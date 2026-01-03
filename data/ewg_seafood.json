@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Wild salmon",
+    "category": "Best Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "Very High",
+    "sustainable": true,
+    "source": "EWG"
+  },
+  {
+    "name": "Sardines",
+    "category": "Best Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "Very High",
+    "sustainable": true,
+    "source": "EWG"
+  },
+  {
+    "name": "Mussels",
+    "category": "Best Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "Very High",
+    "sustainable": true,
+    "source": "EWG"
+  },
+  {
+    "name": "Rainbow trout",
+    "category": "Best Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "Very High",
+    "sustainable": true,
+    "source": "EWG"
+  },
+  {
+    "name": "Atlantic mackerel",
+    "category": "Best Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "Very High",
+    "sustainable": true,
+    "source": "EWG"
+  },
+  {
+    "name": "Wild salmon",
+    "category": "Good Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "High",
+    "sustainable": false,
+    "source": "EWG"
+  },
+  {
+    "name": "Sardines",
+    "category": "Good Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "High",
+    "sustainable": false,
+    "source": "EWG"
+  },
+  {
+    "name": "Mussels",
+    "category": "Good Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "High",
+    "sustainable": false,
+    "source": "EWG"
+  },
+  {
+    "name": "Rainbow trout",
+    "category": "Good Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "High",
+    "sustainable": false,
+    "source": "EWG"
+  },
+  {
+    "name": "Atlantic mackerel",
+    "category": "Good Choice",
+    "mercury_level": "Low",
+    "omega_3_level": "High",
+    "sustainable": false,
+    "source": "EWG"
+  },
+  {
+    "name": "Wild salmon",
+    "category": "Low Mercury",
+    "mercury_level": "Low",
+    "omega_3_level": "Low",
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Sardines",
+    "category": "Low Mercury",
+    "mercury_level": "Low",
+    "omega_3_level": "Low",
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Mussels",
+    "category": "Low Mercury",
+    "mercury_level": "Low",
+    "omega_3_level": "Low",
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Rainbow trout",
+    "category": "Low Mercury",
+    "mercury_level": "Low",
+    "omega_3_level": "Low",
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Atlantic mackerel",
+    "category": "Low Mercury",
+    "mercury_level": "Low",
+    "omega_3_level": "Low",
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Wild salmon",
+    "category": "Avoid",
+    "mercury_level": "High",
+    "omega_3_level": null,
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Sardines",
+    "category": "Avoid",
+    "mercury_level": "High",
+    "omega_3_level": null,
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Mussels",
+    "category": "Avoid",
+    "mercury_level": "High",
+    "omega_3_level": null,
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Rainbow trout",
+    "category": "Avoid",
+    "mercury_level": "High",
+    "omega_3_level": null,
+    "sustainable": null,
+    "source": "EWG"
+  },
+  {
+    "name": "Atlantic mackerel",
+    "category": "Avoid",
+    "mercury_level": "High",
+    "omega_3_level": null,
+    "sustainable": null,
+    "source": "EWG"
+  }
+]
