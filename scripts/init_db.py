@@ -1,350 +1,251 @@
-"""
-Initialize database and seed with data from scrapers
-Run this script to populate the database with initial food safety data
-"""
-import sys
+"""Database initialization script."""
 import asyncio
+import sys
 from pathlib import Path
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent / "apps" / "api"))
+# Add parent directory to path to import from src
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sqlalchemy import text
-from app.db.session import engine, AsyncSessionLocal
-from app.db.models import Base, Food, FoodCategory, Contaminant, Source, FoodContaminantLevel, FoodNutrient, ResearchPaper
-from datetime import datetime
-import re
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from src.models import Base, Source, FishSpecies, ContaminantLevel, NutrientLevel, SafetyRating
+from src.config import get_settings
 
-# Import scrapers
-sys.path.append(str(Path(__file__).parent))
-from scrapers.fda_fish_scraper import scrape_fda_fish_data, scrape_fda_detailed_mercury
-from scrapers.ewg_produce_scraper import scrape_ewg_produce
-from scrapers.pubmed_scraper import collect_food_safety_papers
-from scrapers.usda_api_client import get_nutrition_for_common_foods
+settings = get_settings()
 
 
-def slugify(text: str) -> str:
-    """Convert text to URL-friendly slug"""
-    text = text.lower()
-    text = re.sub(r'[^\w\s-]', '', text)
-    text = re.sub(r'[\s_-]+', '-', text)
-    text = re.sub(r'^-+|-+$', '', text)
-    return text
+async def init_database():
+    """Initialize the database with tables and sample data."""
+    engine = create_async_engine(
+        settings.database_url,
+        echo=True,
+    )
 
-
-async def create_tables():
-    """Create all database tables"""
-    print("🗄️  Creating database tables...")
+    # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        # Enable pg_trgm extension for fuzzy search
-        try:
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
-        except:
-            print("  ⚠️  Could not enable pg_trgm extension (optional)")
-    print("✅ Tables created successfully")
 
+    # Create session
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
-async def seed_categories():
-    """Create food categories"""
-    print("📁 Seeding categories...")
-    async with AsyncSessionLocal() as session:
-        categories = [
-            FoodCategory(name="Seafood", slug="seafood", description="Fish, shellfish, and other seafood"),
-            FoodCategory(name="Produce", slug="produce", description="Fruits and vegetables"),
-            FoodCategory(name="Meat & Poultry", slug="meat-poultry", description="Beef, pork, chicken, and other meats"),
-            FoodCategory(name="Dairy", slug="dairy", description="Milk, cheese, yogurt, and dairy products"),
-            FoodCategory(name="Grains", slug="grains", description="Rice, wheat, oats, and grain products"),
-            FoodCategory(name="Processed Foods", slug="processed", description="Packaged and processed food items"),
+    async with async_session() as session:
+        # Add sources
+        ewg_source = Source(
+            name="EWG Shopper's Guide",
+            url="https://www.ewg.org/consumer-guides/ewgs-consumer-guide-seafood",
+            description="Environmental Working Group's Consumer Guide to Seafood"
+        )
+        
+        fda_source = Source(
+            name="FDA Fish Advice",
+            url="https://www.fda.gov/food/consumers/advice-about-eating-fish",
+            description="FDA and EPA advice about eating fish and shellfish"
+        )
+        
+        session.add_all([ewg_source, fda_source])
+        await session.commit()
+
+        # Add fish species with comprehensive data
+        fish_data = [
+            {
+                "name": "Wild Salmon",
+                "scientific_name": "Oncorhynchus spp.",
+                "description": "Wild-caught Pacific salmon, including varieties like Sockeye, Coho, and King salmon",
+                "source": ewg_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.014, "unit": "ppm", "safety_threshold": 0.3},
+                    {"name": "PCBs", "level": 2.0, "unit": "ppb", "safety_threshold": 2000.0},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 1.8, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 25.0, "unit": "g", "per_serving": "100g"},
+                    {"name": "Vitamin D", "amount": 11.0, "unit": "mcg", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 95,
+                    "safety_score": 95,
+                    "nutrition_score": 98,
+                    "sustainability_score": 92,
+                    "recommendation": "Best Choice",
+                    "notes": "Excellent source of omega-3s with low contaminant levels"
+                }
+            },
+            {
+                "name": "Sardines",
+                "scientific_name": "Sardina pilchardus",
+                "description": "Small, oily fish packed with nutrients",
+                "source": ewg_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.013, "unit": "ppm", "safety_threshold": 0.3},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 1.5, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 25.0, "unit": "g", "per_serving": "100g"},
+                    {"name": "Calcium", "amount": 382.0, "unit": "mg", "per_serving": "100g"},
+                    {"name": "Vitamin B12", "amount": 8.9, "unit": "mcg", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 98,
+                    "safety_score": 98,
+                    "nutrition_score": 99,
+                    "sustainability_score": 97,
+                    "recommendation": "Best Choice",
+                    "notes": "Among the healthiest fish choices with exceptional nutrient density"
+                }
+            },
+            {
+                "name": "Atlantic Mackerel",
+                "scientific_name": "Scomber scombrus",
+                "description": "Oily fish rich in omega-3 fatty acids",
+                "source": ewg_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.050, "unit": "ppm", "safety_threshold": 0.3},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 2.6, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 19.0, "unit": "g", "per_serving": "100g"},
+                    {"name": "Vitamin B12", "amount": 8.7, "unit": "mcg", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 92,
+                    "safety_score": 90,
+                    "nutrition_score": 96,
+                    "sustainability_score": 90,
+                    "recommendation": "Best Choice",
+                    "notes": "High in omega-3s with acceptable mercury levels"
+                }
+            },
+            {
+                "name": "Farmed Rainbow Trout",
+                "scientific_name": "Oncorhynchus mykiss",
+                "description": "Freshwater fish typically farmed in the US",
+                "source": fda_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.071, "unit": "ppm", "safety_threshold": 0.3},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 0.98, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 20.5, "unit": "g", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 85,
+                    "safety_score": 85,
+                    "nutrition_score": 88,
+                    "sustainability_score": 82,
+                    "recommendation": "Good Choice",
+                    "notes": "Good nutritional profile with moderate environmental impact"
+                }
+            },
+            {
+                "name": "Albacore Tuna",
+                "scientific_name": "Thunnus alalunga",
+                "description": "White tuna with higher mercury levels than light tuna",
+                "source": fda_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.350, "unit": "ppm", "safety_threshold": 0.3},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 1.5, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 30.0, "unit": "g", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 65,
+                    "safety_score": 55,
+                    "nutrition_score": 80,
+                    "sustainability_score": 60,
+                    "recommendation": "Moderate Consumption",
+                    "notes": "Limit consumption due to elevated mercury levels"
+                }
+            },
+            {
+                "name": "King Mackerel",
+                "scientific_name": "Scomberomorus cavalla",
+                "description": "Large mackerel species with high mercury content",
+                "source": fda_source,
+                "contaminants": [
+                    {"name": "Mercury", "level": 0.730, "unit": "ppm", "safety_threshold": 0.3},
+                ],
+                "nutrients": [
+                    {"name": "Omega-3", "amount": 2.2, "unit": "g", "per_serving": "100g"},
+                    {"name": "Protein", "amount": 21.0, "unit": "g", "per_serving": "100g"},
+                ],
+                "rating": {
+                    "overall_score": 35,
+                    "safety_score": 25,
+                    "nutrition_score": 70,
+                    "sustainability_score": 40,
+                    "recommendation": "Avoid",
+                    "notes": "High mercury levels make this fish unsuitable for regular consumption"
+                }
+            },
         ]
-        session.add_all(categories)
-        await session.commit()
-    print(f"✅ Created {len(categories)} categories")
 
-
-async def seed_contaminants():
-    """Create contaminant types"""
-    print("☣️  Seeding contaminants...")
-    async with AsyncSessionLocal() as session:
-        contaminants = [
-            Contaminant(
-                name="Mercury",
-                chemical_name="Methylmercury",
-                description="Toxic heavy metal that accumulates in fish",
-                health_effects="Neurological damage, developmental issues, especially harmful to pregnant women and children",
-                acceptable_daily_intake=0.0001,  # 0.1 µg/kg body weight/day
-                unit="ppm"
-            ),
-            Contaminant(
-                name="Pesticides",
-                chemical_name="Various organophosphates and other chemicals",
-                description="Agricultural chemicals used to control pests",
-                health_effects="Varies by chemical; some are neurotoxic, endocrine disruptors, or carcinogenic",
-                unit="ppm"
-            ),
-            Contaminant(
-                name="PCBs",
-                chemical_name="Polychlorinated Biphenyls",
-                description="Persistent organic pollutants found in fatty fish",
-                health_effects="Carcinogenic, endocrine disruption, immune system effects",
-                unit="ppb"
-            ),
-            Contaminant(
-                name="Microplastics",
-                description="Tiny plastic particles found in seafood and water",
-                health_effects="Long-term effects unknown; potential inflammation and cellular damage",
-                unit="particles/g"
-            ),
-            Contaminant(
-                name="Lead",
-                description="Toxic heavy metal from environmental contamination",
-                health_effects="Neurological damage, developmental delays, kidney damage",
-                acceptable_daily_intake=0.0036,
-                unit="ppm"
-            ),
-        ]
-        session.add_all(contaminants)
-        await session.commit()
-    print(f"✅ Created {len(contaminants)} contaminants")
-
-
-async def seed_sources():
-    """Create data sources"""
-    print("📚 Seeding data sources...")
-    async with AsyncSessionLocal() as session:
-        sources = [
-            Source(
-                name="FDA Fish Advice",
-                url="https://www.fda.gov/food/consumers/advice-about-eating-fish",
-                source_type="government",
-                credibility_score=10,
-                last_updated=datetime.now(),
-                update_frequency="annually"
-            ),
-            Source(
-                name="EWG Shopper's Guide",
-                url="https://www.ewg.org/foodnews/",
-                source_type="ngo",
-                credibility_score=8,
-                last_updated=datetime.now(),
-                update_frequency="annually"
-            ),
-            Source(
-                name="USDA FoodData Central",
-                url="https://fdc.nal.usda.gov/",
-                source_type="government",
-                credibility_score=10,
-                last_updated=datetime.now(),
-                update_frequency="monthly"
-            ),
-            Source(
-                name="PubMed/NCBI",
-                url="https://pubmed.ncbi.nlm.nih.gov/",
-                source_type="academic",
-                credibility_score=9,
-                last_updated=datetime.now(),
-                update_frequency="daily"
-            ),
-        ]
-        session.add_all(sources)
-        await session.commit()
-    print(f"✅ Created {len(sources)} data sources")
-
-
-async def seed_fish_data():
-    """Seed fish data from FDA"""
-    print("🐟 Seeding fish data...")
-
-    # Get seafood category
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(text("SELECT id FROM food_categories WHERE slug = 'seafood'"))
-        seafood_category_id = result.scalar_one()
-
-        result = await session.execute(text("SELECT id FROM sources WHERE name = 'FDA Fish Advice'"))
-        fda_source_id = result.scalar_one()
-
-        result = await session.execute(text("SELECT id FROM contaminants WHERE name = 'Mercury'"))
-        mercury_id = result.scalar_one()
-
-    # Scrape data
-    fish_data = await scrape_fda_fish_data()
-    mercury_levels = await scrape_fda_detailed_mercury()
-
-    async with AsyncSessionLocal() as session:
-        food_count = 0
-
-        for fish_info in fish_data:
-            # Create food entry
-            food = Food(
-                name=fish_info["name"],
-                slug=slugify(fish_info["name"]),
-                category_id=seafood_category_id,
-                description=f"{fish_info['consumption_advice']}. Source: FDA Fish Advice 2024",
-                common_names=[fish_info["name"].lower()]
+        # Create fish species with related data
+        for fish in fish_data:
+            species = FishSpecies(
+                name=fish["name"],
+                scientific_name=fish["scientific_name"],
+                description=fish["description"],
+                source_id=fish["source"].id
             )
-            session.add(food)
-            await session.flush()  # Get the ID
+            session.add(species)
+            await session.flush()  # Get the species ID
 
-            # Add mercury contaminant level
-            mercury_ppm = mercury_levels.get(fish_info["name"], fish_info.get("mercury_ppm", 0.1))
+            # Add contaminants
+            for cont in fish["contaminants"]:
+                contaminant = ContaminantLevel(
+                    fish_species_id=species.id,
+                    contaminant_name=cont["name"],
+                    level=cont["level"],
+                    unit=cont["unit"],
+                    safety_threshold=cont["safety_threshold"]
+                )
+                session.add(contaminant)
 
-            contaminant_level = FoodContaminantLevel(
-                food_id=food.id,
-                contaminant_id=mercury_id,
-                level_value=mercury_ppm,
-                level_unit="ppm",
-                risk_score=fish_info["risk_score"],
-                risk_category=fish_info["risk_category"],
-                source_id=fda_source_id,
-                measurement_date=datetime.now(),
-                notes=fish_info["consumption_advice"]
+            # Add nutrients
+            for nutr in fish["nutrients"]:
+                nutrient = NutrientLevel(
+                    fish_species_id=species.id,
+                    nutrient_name=nutr["name"],
+                    amount=nutr["amount"],
+                    unit=nutr["unit"],
+                    per_serving=nutr["per_serving"]
+                )
+                session.add(nutrient)
+
+            # Add rating
+            rating = SafetyRating(
+                fish_species_id=species.id,
+                source_id=fish["source"].id,
+                overall_score=fish["rating"]["overall_score"],
+                safety_score=fish["rating"]["safety_score"],
+                nutrition_score=fish["rating"]["nutrition_score"],
+                sustainability_score=fish["rating"]["sustainability_score"],
+                recommendation=fish["rating"]["recommendation"],
+                notes=fish["rating"]["notes"]
             )
-            session.add(contaminant_level)
-            food_count += 1
+            session.add(rating)
 
         await session.commit()
 
-    print(f"✅ Created {food_count} fish entries")
+        # Verify data was added
+        result = await session.execute(select(Source).where(Source.name == "EWG Shopper's Guide"))
+        ewg = result.scalar_one_or_none()
+        print(f"\nAdded source: {ewg.name}")
 
+        result = await session.execute(select(FishSpecies))
+        species_list = result.scalars().all()
+        print(f"\nAdded {len(species_list)} fish species:")
+        for species in species_list:
+            print(f"  - {species.name}")
 
-async def seed_produce_data():
-    """Seed produce data from EWG"""
-    print("🥗 Seeding produce data...")
-
-    # Get produce category
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(text("SELECT id FROM food_categories WHERE slug = 'produce'"))
-        produce_category_id = result.scalar_one()
-
-        result = await session.execute(text("SELECT id FROM sources WHERE name = 'EWG Shopper''s Guide'"))
-        ewg_source_id = result.scalar_one()
-
-        result = await session.execute(text("SELECT id FROM contaminants WHERE name = 'Pesticides'"))
-        pesticides_id = result.scalar_one()
-
-    # Scrape data
-    produce_data = await scrape_ewg_produce()
-
-    async with AsyncSessionLocal() as session:
-        food_count = 0
-
-        for produce_info in produce_data:
-            # Create food entry
-            food = Food(
-                name=produce_info["name"],
-                slug=slugify(produce_info["name"]),
-                category_id=produce_category_id,
-                description=f"{produce_info['list_type']}. {produce_info['advice']}",
-                common_names=[produce_info["name"].lower()]
-            )
-            session.add(food)
-            await session.flush()
-
-            # Add pesticide contaminant level
-            contaminant_level = FoodContaminantLevel(
-                food_id=food.id,
-                contaminant_id=pesticides_id,
-                level_value=None,  # EWG doesn't provide exact levels
-                level_unit="relative",
-                risk_score=produce_info["risk_score"],
-                risk_category=produce_info["risk_category"],
-                source_id=ewg_source_id,
-                measurement_date=datetime.now(),
-                notes=produce_info["advice"]
-            )
-            session.add(contaminant_level)
-            food_count += 1
-
-        await session.commit()
-
-    print(f"✅ Created {food_count} produce entries")
-
-
-async def seed_research_papers():
-    """Seed research papers from PubMed"""
-    print("📄 Seeding research papers...")
-
-    # Collect papers (limit to avoid long runtime)
-    papers = await collect_food_safety_papers(max_per_topic=20)
-
-    async with AsyncSessionLocal() as session:
-        paper_count = 0
-
-        for paper_data in papers:
-            # Extract keywords from title and abstract
-            text = f"{paper_data.get('title', '')} {paper_data.get('abstract', '')}"
-            keywords = []
-
-            # Simple keyword extraction
-            keyword_terms = ["mercury", "pesticide", "contamination", "microplastic",
-                           "safety", "toxicity", "heavy metal", "PCB", "nutrition"]
-            for term in keyword_terms:
-                if term.lower() in text.lower():
-                    keywords.append(term)
-
-            paper = ResearchPaper(
-                title=paper_data["title"],
-                authors=paper_data.get("authors", []),
-                abstract=paper_data.get("abstract", ""),
-                journal=paper_data.get("journal", ""),
-                publication_date=datetime.fromisoformat(paper_data["publication_date"]) if paper_data.get("publication_date") else None,
-                doi=paper_data.get("doi"),
-                pmid=paper_data.get("pmid"),
-                url=paper_data.get("url", ""),
-                keywords=keywords,
-                related_contaminants=keywords  # Simplified
-            )
-            session.add(paper)
-            paper_count += 1
-
-        await session.commit()
-
-    print(f"✅ Created {paper_count} research paper entries")
-
-
-async def main():
-    """Main seeding function"""
-    print("\n" + "="*60)
-    print("🌱 FOOD SAFETY PLATFORM - DATABASE INITIALIZATION")
-    print("="*60 + "\n")
-
-    try:
-        # Create tables
-        await create_tables()
-
-        # Seed reference data
-        await seed_categories()
-        await seed_contaminants()
-        await seed_sources()
-
-        # Seed food data
-        await seed_fish_data()
-        await seed_produce_data()
-
-        # Seed research papers
-        await seed_research_papers()
-
-        print("\n" + "="*60)
-        print("✅ DATABASE INITIALIZATION COMPLETE!")
-        print("="*60)
-        print("\nYour database now contains:")
-        print("  - Food categories")
-        print("  - Contaminant types")
-        print("  - Trusted data sources")
-        print("  - 60+ fish species with mercury data")
-        print("  - 30+ produce items with pesticide data")
-        print("  - Research papers on food safety")
-        print("\nNext steps:")
-        print("  1. Start the API server: cd apps/api && uvicorn main:app --reload")
-        print("  2. Start the web app: cd apps/web && npm run dev")
-        print("  3. Visit http://localhost:3000")
-        print()
-
-    except Exception as e:
-        print(f"\n❌ Error during initialization: {e}")
-        raise
+    await engine.dispose()
+    print("\nDatabase initialization complete!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(init_database())
