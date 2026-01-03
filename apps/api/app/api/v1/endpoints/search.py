@@ -4,6 +4,7 @@ Search endpoints
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload, joinedload
 from typing import List
 
 from app.db.session import get_db
@@ -11,7 +12,7 @@ from app.db import models, schemas
 
 router = APIRouter()
 
-@router.get("/", response_model=schemas.FoodSearchResult)
+@router.get("", response_model=schemas.FoodSearchResult)
 async def search_foods(
     q: str = Query(..., description="Search query", min_length=1),
     limit: int = Query(20, ge=1, le=100),
@@ -35,7 +36,11 @@ async def search_foods(
     total = count_result.scalar()
 
     # Get paginated results
-    query = select(models.Food).where(
+    query = select(models.Food).options(
+        joinedload(models.Food.category),
+        selectinload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
+        selectinload(models.Food.nutrients)
+    ).where(
         or_(
             models.Food.name.ilike(search_term),
             func.array_to_string(models.Food.common_names, ',').ilike(search_term)
