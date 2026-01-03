@@ -28,16 +28,26 @@ fi
 echo "✅ Prerequisites check passed!"
 echo ""
 
+# Create and activate virtual environment
+echo "🐍 Setting up Python virtual environment..."
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+fi
+source .venv/bin/activate
+echo "✅ Virtual environment active!"
+echo ""
+
 # Create database
 echo "📦 Creating PostgreSQL database..."
 psql -U postgres -c "CREATE DATABASE foodsafety;" 2>/dev/null || echo "  Database may already exist, continuing..."
+psql -d foodsafety -U postgres -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 echo "✅ Database ready!"
 echo ""
 
 # Install Python dependencies
 echo "🐍 Installing Python dependencies..."
 cd apps/api
-pip install -q -r requirements.txt
+python3 -m pip install -q -r requirements.txt
 cd ../..
 echo "✅ Python dependencies installed!"
 echo ""
@@ -54,7 +64,7 @@ echo ""
 echo "🌱 Seeding database with food data..."
 echo "   This will scrape FDA, EWG, and PubMed data..."
 cd scripts
-python init_db.py
+python3 init_db.py
 cd ..
 echo "✅ Database seeded successfully!"
 echo ""

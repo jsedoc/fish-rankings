@@ -4,6 +4,7 @@ Food endpoints
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload, joinedload
 from typing import List
 from uuid import UUID
 
@@ -22,7 +23,7 @@ async def list_foods(
     """
     List all foods with optional filtering
     """
-    query = select(models.Food)
+    query = select(models.Food).options(joinedload(models.Food.category))
 
     if category:
         # Join with category and filter
@@ -30,7 +31,7 @@ async def list_foods(
 
     query = query.offset(skip).limit(limit)
     result = await db.execute(query)
-    foods = result.scalars().all()
+    foods = result.unique().scalars().all()
 
     return foods
 
@@ -43,9 +44,14 @@ async def get_food(
     """
     Get detailed information about a specific food
     """
-    query = select(models.Food).where(models.Food.id == food_id)
+    query = select(models.Food).where(models.Food.id == food_id).options(
+        joinedload(models.Food.category),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+    )
     result = await db.execute(query)
-    food = result.scalar_one_or_none()
+    food = result.unique().scalar_one_or_none()
 
     if not food:
         raise HTTPException(status_code=404, detail="Food not found")
@@ -61,9 +67,14 @@ async def get_food_by_slug(
     """
     Get food by slug (URL-friendly identifier)
     """
-    query = select(models.Food).where(models.Food.slug == slug)
+    query = select(models.Food).where(models.Food.slug == slug).options(
+        joinedload(models.Food.category),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+    )
     result = await db.execute(query)
-    food = result.scalar_one_or_none()
+    food = result.unique().scalar_one_or_none()
 
     if not food:
         raise HTTPException(status_code=404, detail="Food not found")
@@ -79,9 +90,14 @@ async def get_food_by_barcode(
     """
     Look up food by barcode (UPC/EAN)
     """
-    query = select(models.Food).where(models.Food.barcode == barcode)
+    query = select(models.Food).where(models.Food.barcode == barcode).options(
+        joinedload(models.Food.category),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
+        joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+    )
     result = await db.execute(query)
-    food = result.scalar_one_or_none()
+    food = result.unique().scalar_one_or_none()
 
     if not food:
         raise HTTPException(status_code=404, detail="Food not found for this barcode")

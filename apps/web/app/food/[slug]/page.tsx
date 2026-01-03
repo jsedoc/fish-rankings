@@ -57,8 +57,17 @@ export default function FoodDetailPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetchFood()
-  }, [slug])
+    fetch(`/api/v1/foods/slug/${params.slug}`)
+      .then(res => res.json())
+      .then(data => {
+        setFood(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [params.slug])
+
+  if (loading) return <div>Loading...</div>
+  if (!food) return notFound()
 
   const fetchFood = async () => {
     setLoading(true)
