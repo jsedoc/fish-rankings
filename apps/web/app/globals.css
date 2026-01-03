@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .risk-badge-low {
+    @apply bg-green-100 text-green-800 border-green-300;
+  }
+
+  .risk-badge-medium {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-300;
+  }
+
+  .risk-badge-high {
+    @apply bg-red-100 text-red-800 border-red-300;
+  }
+
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow;
+  }
+}
