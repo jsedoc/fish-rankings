@@ -8,7 +8,7 @@ export default function FoodDetailPage({ params }: { params: { slug: string } })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/food/${params.slug}`)
+    fetch(`/api/v1/foods/slug/${params.slug}`)
       .then(res => res.json())
       .then(data => {
         setFood(data)
