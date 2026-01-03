@@ -1,6 +1,8 @@
 """Database initialization script."""
 import asyncio
 import sys
+import json
+import os
 from pathlib import Path
 
 # Add apps/api to path to import from app
@@ -13,6 +15,8 @@ from sqlalchemy.sql import func
 from app.db.models import Base, Source, Food, Contaminant, FoodContaminantLevel, FoodNutrient, FoodCategory
 from app.core.config import settings
 
+def slugify(text: str) -> str:
+    return text.lower().replace(" ", "-").replace("/", "-")
 
 async def init_database():
     """Initialize the database with tables and sample data."""
@@ -48,21 +52,15 @@ async def init_database():
         session.add_all([ewg_source, fda_source])
         await session.commit()
 
-        # 2. Add Contaminants (Prerequisite for FoodContaminantLevel)
+        # 2. Add Contaminants
         mercury = Contaminant(
             name="Mercury",
             chemical_name="Methylmercury",
             unit="ppm",
             description="A heavy metal that can accumulate in fish."
         )
-        pcbs = Contaminant(
-            name="PCBs",
-            chemical_name="Polychlorinated Biphenyls",
-            unit="ppb",
-            description="Industrial chemicals that bioaccumulate."
-        )
         
-        session.add_all([mercury, pcbs])
+        session.add(mercury)
         await session.commit()
 
         # 3. Add Category
@@ -74,139 +72,107 @@ async def init_database():
         session.add(seafood_category)
         await session.commit()
 
-        # 4. Add fish species (Foods)
-        fish_data = [
-            {
-                "name": "Wild Salmon",
-                "slug": "wild-salmon",
-                "description": "Wild-caught Pacific salmon, including varieties like Sockeye, Coho, and King salmon",
-                "source": ewg_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.014},
-                    {"contaminant": pcbs, "level": 2.0, "unit": "ppb"},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 1.8, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 25.0, "unit": "g", "per_serving": "100g"},
-                    {"name": "Vitamin D", "amount": 11.0, "unit": "mcg", "per_serving": "100g"},
-                ],
-            },
-            {
-                "name": "Sardines",
-                "slug": "sardines",
-                "description": "Small, oily fish packed with nutrients",
-                "source": ewg_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.013},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 1.5, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 25.0, "unit": "g", "per_serving": "100g"},
-                    {"name": "Calcium", "amount": 382.0, "unit": "mg", "per_serving": "100g"},
-                    {"name": "Vitamin B12", "amount": 8.9, "unit": "mcg", "per_serving": "100g"},
-                ],
-            },
-            {
-                "name": "Atlantic Mackerel",
-                "slug": "atlantic-mackerel",
-                "description": "Oily fish rich in omega-3 fatty acids",
-                "source": ewg_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.050},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 2.6, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 19.0, "unit": "g", "per_serving": "100g"},
-                    {"name": "Vitamin B12", "amount": 8.7, "unit": "mcg", "per_serving": "100g"},
-                ],
-            },
-            {
-                "name": "Farmed Rainbow Trout",
-                "slug": "farmed-rainbow-trout",
-                "description": "Freshwater fish typically farmed in the US",
-                "source": fda_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.071},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 0.98, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 20.5, "unit": "g", "per_serving": "100g"},
-                ],
-            },
-            {
-                "name": "Albacore Tuna",
-                "slug": "albacore-tuna",
-                "description": "White tuna with higher mercury levels than light tuna",
-                "source": fda_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.350},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 1.5, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 30.0, "unit": "g", "per_serving": "100g"},
-                ],
-            },
-            {
-                "name": "King Mackerel",
-                "slug": "king-mackerel",
-                "description": "Large mackerel species with high mercury content",
-                "source": fda_source,
-                "contaminants": [
-                    {"contaminant": mercury, "level": 0.730},
-                ],
-                "nutrients": [
-                    {"name": "Omega-3", "amount": 2.2, "unit": "g", "per_serving": "100g"},
-                    {"name": "Protein", "amount": 21.0, "unit": "g", "per_serving": "100g"},
-                ],
-            },
-        ]
+        # Helper to get or create food
+        existing_foods = {} # name -> Food object
 
-        for fish in fish_data:
-            food = Food(
-                name=fish["name"],
-                slug=fish["slug"],
-                description=fish["description"],
-                category_id=seafood_category.id
-            )
-            session.add(food)
-            await session.flush()  # Get ID
+        async def get_or_create_food(name, description=""):
+            # Simple normalization: duplicate singular/plural handling would need more logic
+            # For now, treat exact name matches.
+            if name in existing_foods:
+                return existing_foods[name]
+            
+            # Check DB
+            stmt = select(Food).where(Food.name == name)
+            result = await session.execute(stmt)
+            food = result.scalar_one_or_none()
+            
+            if not food:
+                food = Food(
+                    name=name,
+                    slug=slugify(name),
+                    description=description,
+                    category_id=seafood_category.id
+                )
+                session.add(food)
+                await session.flush()
+            
+            existing_foods[name] = food
+            return food
 
-            # Add contaminants
-            for cont in fish["contaminants"]:
+        # 4. Load FDA Data
+        fda_file = Path("data/fda_mercury_1990_2012.json")
+        if fda_file.exists():
+            print(f"Loading FDA data from {fda_file}...")
+            with open(fda_file) as f:
+                fda_data = json.load(f)
+                
+            count = 0
+            for item in fda_data:
+                name = item["name"]
+                mean_ppm = item["mercury_mean_ppm"]
+                
+                food = await get_or_create_food(name, f"Source: FDA (1990-2012)")
+                
+                # Add Mercury Level
                 level = FoodContaminantLevel(
                     food_id=food.id,
-                    contaminant_id=cont["contaminant"].id,
-                    level_value=cont["level"],
-                    level_unit=cont.get("unit", cont["contaminant"].unit),
-                    source_id=fish["source"].id,
+                    contaminant_id=mercury.id,
+                    level_value=mean_ppm,
+                    level_unit="ppm",
+                    source_id=fda_source.id,
                     measurement_date=func.now()
                 )
                 session.add(level)
+                count += 1
+            print(f"Loaded {count} FDA records.")
+        else:
+            print(f"Warning: {fda_file} not found.")
 
-            # Add nutrients
-            for nutr in fish["nutrients"]:
-                nutrient = FoodNutrient(
-                    food_id=food.id,
-                    nutrient_name=nutr["name"],
-                    amount=nutr["amount"],
-                    unit=nutr["unit"],
-                    per_serving_size=nutr["per_serving"],
-                    source_id=fish["source"].id
-                )
-                session.add(nutrient)
+        # 5. Load EWG Data
+        ewg_file = Path("data/ewg_seafood.json")
+        if ewg_file.exists():
+            print(f"Loading EWG data from {ewg_file}...")
+            with open(ewg_file) as f:
+                ewg_data = json.load(f)
+            
+            count = 0
+            for item in ewg_data:
+                name = item["name"]
+                category = item["category"]
+                mercury_level = item["mercury_level"]
+                omega3 = item["omega_3_level"]
+                sustainable = item["sustainable"]
+                
+                # EWG names like "Wild salmon" vs FDA "Salmon"
+                # We won't do fuzzy match for now, just create new entries if mismatch
+                
+                desc = f"EWG Category: {category}."
+                if omega3:
+                    desc += f" Omega-3: {omega3}."
+                if sustainable is not None:
+                    desc += " Sustainable." if sustainable else " Unsustainable."
+                
+                food = await get_or_create_food(name, desc)
+                
+                # Update description if it was generic
+                if "Source: FDA" in food.description:
+                     food.description += f" | {desc}"
+                     session.add(food)
+                
+                # We can't easily add exact contaminant levels since EWG gives categories (Low/High)
+                # But we validly loaded the food entity.
+                
+                count += 1
+            print(f"Loaded {count} EWG records.")
+        else:
+            print(f"Warning: {ewg_file} not found.")
 
         await session.commit()
 
-        # Verify data was added
-        result = await session.execute(select(Source).where(Source.name == "EWG Shopper's Guide"))
-        ewg = result.scalar_one_or_none()
-        print(f"\nAdded source: {ewg.name}")
-
-        result = await session.execute(select(Food))
-        foods_list = result.scalars().all()
-        print(f"\nAdded {len(foods_list)} foods:")
-        for f in foods_list:
-            print(f"  - {f.name}")
+        # Verify
+        result = await session.execute(select(func.count(Food.id)))
+        count = result.scalar()
+        print(f"\nTotal foods in database: {count}")
 
     await engine.dispose()
     print("\nDatabase initialization complete!")
