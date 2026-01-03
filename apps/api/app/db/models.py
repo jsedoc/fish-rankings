@@ -44,10 +44,9 @@ class Food(Base):
     contaminant_levels = relationship("FoodContaminantLevel", back_populates="food", cascade="all, delete-orphan")
     nutrients = relationship("FoodNutrient", back_populates="food", cascade="all, delete-orphan")
 
-    # Indexes
-    __table_args__ = (
-        Index('idx_food_name_trgm', name, postgresql_using='gin', postgresql_ops={'name': 'gin_trgm_ops'}),
-    )
+    # Note: Fuzzy search index (pg_trgm) can be added later with:
+    # CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    # CREATE INDEX idx_food_name_trgm ON foods USING gin (name gin_trgm_ops);
 
 
 class Contaminant(Base):
@@ -149,6 +148,5 @@ class ResearchPaper(Base):
     related_foods = Column(ARRAY(String))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index('idx_paper_keywords', keywords, postgresql_using='gin'),
-    )
+    # Note: GIN index for keywords can be added later if needed
+    # CREATE INDEX idx_paper_keywords ON research_papers USING gin (keywords);
