@@ -1,319 +1,604 @@
-# Complete guide to food safety data sources
+# Food Safety Platform - Data Sources
 
-The landscape of food safety data spans **over 150 distinct sources** across government agencies, research institutions, NGOs, and commercial providers. For building a consumer-facing platform, the most actionable data comes from a surprisingly small subset: USDA's FoodData Central and Pesticide Data Program, FDA's openFDA APIs, EWG's consumer databases, Monterey Bay Aquarium's Seafood Watch API, and Open Food Facts provide the foundation for comprehensive food safety coverage with programmatic access.
+This document catalogs all data sources used and planned for the Food Safety Platform, including implementation status, credibility ratings, and integration details.
 
-This guide catalogs every significant data source organized by accessibility and data quality, with specific details on APIs, download options, and licensing constraints.
+## 📊 Overview
 
----
-
-## Government sources anchor the most authoritative data
-
-Federal agencies maintain the gold standard for food safety monitoring. The **USDA Pesticide Data Program (PDP)** stands out with **42+ million data points** from testing 126 commodities since 1991—the most comprehensive pesticide residue dataset available anywhere. Data downloads are free in CSV/Access formats at ams.usda.gov/datasets/pdp.
-
-### FDA databases and APIs
-
-| Database | Data Type | Access Method | Update Frequency |
-|----------|-----------|---------------|------------------|
-| **openFDA Food Enforcement** | Recalls, adverse events | REST API (JSON) | Weekly |
-| **Total Diet Study** | Nutrients + contaminants in 307 foods | Excel/PDF downloads | Multi-year cycles |
-| **Mercury in Fish** | Mercury PPM for 60+ species | Web tables | Historical (1990-2012) |
-| **PFAS Testing Program** | 30 PFAS chemicals in food | PDF analytical results | Ongoing |
-| **Import Alerts Database** | Detained products/firms | Web search | Real-time |
-| **Pesticide Residue Monitoring** | Pesticide testing on imports/domestic | Annual PDF reports | Annual |
-
-The **openFDA platform** (open.fda.gov) provides the most developer-friendly access with free API keys, JSON responses, and 1,000 requests/hour rate limits. Endpoints cover food enforcement actions, CAERS adverse events, and recall data from 2004-present.
-
-### EPA contaminant databases
-
-EPA's **Integrated Risk Information System (IRIS)** provides toxicity assessments with Reference Doses (RfD) and cancer slope factors for hundreds of chemicals—essential for risk calculations. The **Toxics Release Inventory (TRI)** tracks releases of 800+ chemicals including 172 PFAS compounds, accessible via the EnviroFacts REST API.
-
-Critical gap: The **National Listing of Fish Advisories** contains only historical data through 2011. Current fish advisories must be obtained from individual states—no centralized national database exists.
-
-### USDA comprehensive nutrition and contaminant data
-
-**FoodData Central** (fdc.nal.usda.gov) is the authoritative nutrition database with **300,000+ foods** across Foundation Foods, SR Legacy, FNDDS, and Branded Food Products. The REST API requires a free data.gov key with 1,000 requests/hour limits. Data is CC0 public domain.
-
-The **FSIS Recall API** launched September 2023 provides real-time JSON access to meat, poultry, and egg product recalls—a significant improvement over previous web-only access.
-
-### CDC biomonitoring and outbreak surveillance
-
-**NHANES** provides chemical biomonitoring for 350+ chemicals in representative U.S. populations, including pesticides, heavy metals, PFAS, and PCBs. Public-use files are freely downloadable; restricted data requires Research Data Center access.
-
-| CDC Database | Focus | Access | Notes |
-|--------------|-------|--------|-------|
-| **FoodNet Fast** | 8 pathogen surveillance | Interactive dashboard | 16% U.S. population coverage |
-| **NORS/BEAM Dashboard** | Outbreak reporting | CSV downloads | 12-18 month data lag |
-| **National Exposure Report** | 350+ chemical biomonitoring | PDF/web tables | NHANES-derived |
+| Status | Count |
+|--------|-------|
+| ✅ Implemented | 4 |
+| 🔄 In Progress | 0 |
+| 📋 Planned | 11 |
+| **Total** | **15** |
 
 ---
 
-## State and international government sources vary dramatically in accessibility
+## ✅ IMPLEMENTED SOURCES
 
-### U.S. state-level databases
+### 1. FDA (Food and Drug Administration) - ⭐⭐⭐⭐⭐ (10/10)
 
-**California Proposition 65** maintains the most actionable state database—a searchable list of chemicals known to cause cancer or reproductive toxicity with safe harbor levels (NSRLs/MADLs). Downloadable as Excel at oehha.ca.gov.
+**Status**: ✅ Implemented
+**Type**: Government
+**Implementation**: Web scraper (manual data + API fallback)
 
-Most states do **not** publish food testing databases publicly. Fish consumption advisories exist but require manual collection from individual state health departments.
+**Data Collected**:
+- Fish mercury levels for 60+ species
+- Consumption advisories (Best Choice, Good Choice, Avoid)
+- Risk categorization
+- Serving recommendations
 
-### European Union leads in public data transparency
+**URLs**:
+- Main: https://www.fda.gov/food/consumers/advice-about-eating-fish
+- API: https://open.fda.gov/apis/
 
-The EU offers the most comprehensive publicly accessible food safety databases globally:
+**Update Frequency**: Annually (fish advice), Daily (recalls)
+**Coverage**: 60+ fish species
+**Implementation File**: `scripts/scrapers/fda_fish_scraper.py`
 
-| EU Database | URL | Data Type | API Access |
-|-------------|-----|-----------|------------|
-| **RASFF** | webgate.ec.europa.eu/rasff-window | Real-time food/feed alerts | Limited |
-| **EU Pesticides Database** | ec.europa.eu/food/plant/pesticides | MRLs for all pesticides | Yes (JSON/XML) |
-| **EFSA OpenFoodTox** | efsa.europa.eu | Toxicology for 5,700+ substances | Excel downloads |
-| **EFSA Food Consumption** | efsa.europa.eu | EU population consumption data | Dashboard |
+**Data Structure**:
+```python
+{
+    "name": "Salmon",
+    "mercury_ppm": 0.02,
+    "risk_score": 20,
+    "risk_category": "low",
+    "consumption_advice": "Best Choice - 2-3 servings per week",
+    "source": "FDA Fish Advice 2024"
+}
+```
 
-**OpenFoodTox** deserves special mention—it contains ADI/TDI values, NOAELs, BMD values, and genotoxicity data for 5,712 substances evaluated by EFSA, freely downloadable as Excel spreadsheets via Zenodo.
-
-### UK Food Standards Agency API
-
-The **Food Hygiene Rating Scheme API** (api.ratings.food.gov.uk) requires no registration or API key—a rare fully open government API. Returns XML/JSON for all UK food business hygiene ratings with daily updates.
-
-### Canada's open government approach
-
-Canada publishes the **Canadian Total Diet Study** and **CANLINE** surveillance data through the Open Government Portal (open.canada.ca). Data spans 1969-present covering trace elements, pesticides, radionuclides, and industrial chemicals in 160+ food composites. Available as Excel/CSV.
-
-### Australia and New Zealand
-
-**FSANZ** publishes the **Australian Total Diet Study** covering 600+ chemicals in the latest (28th) study. The **Australian Food Composition Database** offers 256 nutrients per food item. Both are free but primarily PDF format rather than API access.
-
-### Japan and China
-
-Japan's MHLW maintains MRL databases for 10,000+ pesticides/veterinary drugs, but detailed data is primarily in Japanese only. China's CFSA publishes Total Diet Study results, but international access is limited—most detailed data requires Chinese language proficiency.
-
----
-
-## Academic databases require distinguishing subscription from open access
-
-### Free academic resources
-
-| Database | Coverage | Access | Best For |
-|----------|----------|--------|----------|
-| **PubMed/MEDLINE** | 36M+ citations | Free API via E-utilities | Literature searches |
-| **AGRICOLA** (via NAL) | Agricultural citations | Free web search | Agriculture research |
-| **PubAg** | 40,000+ USDA articles | Free full-text links | USDA research |
-| **FSRIO** | 16,000+ research projects | Searchable database | Tracking funded research |
-
-The **USDA Ag Data Commons** (data.nal.usda.gov) provides free access to USDA research datasets including the Pesticide Data Program in structured formats.
-
-### Subscription databases
-
-**FSTA (Food Science and Technology Abstracts)** is the most specialized for food safety with 2+ million abstracts from 22,675 sources, but requires institutional subscription via Web of Science or EBSCO.
-
-**CAB Abstracts** covers 12+ million records across agriculture and food science from 120+ countries but also requires subscription access.
-
-### Data repositories for research datasets
-
-| Repository | Scope | Access | Deposit Cost |
-|------------|-------|--------|--------------|
-| **Harvard Dataverse** | General research | Free | Free (up to 1TB) |
-| **Zenodo** | CERN-backed | Free | Free |
-| **Dryad** | Curated scientific data | Free access | $120 base fee |
-| **Figshare** | All formats | Free | Free (up to 5GB) |
-| **Ag Data Commons** | USDA agriculture data | Free | N/A |
-
-Harvard Dataverse hosts the **Feed the Future Innovation Lab for Food Safety** datasets—useful for developing country food safety data.
+**Integration Notes**:
+- Real FDA data used
+- Includes detailed mercury measurements
+- Categorized by consumption frequency
+- Updated annually by FDA
 
 ---
 
-## NGO databases fill gaps government sources miss
+### 2. EWG (Environmental Working Group) - ⭐⭐⭐⭐ (8/10)
 
-### Environmental Working Group databases
+**Status**: ✅ Implemented
+**Type**: Non-Governmental Organization (NGO)
+**Implementation**: Web scraper
 
-EWG maintains the largest collection of consumer-accessible food safety databases, though **none offer API access**:
+**Data Collected**:
+- Dirty Dozen (12 produce items with highest pesticides)
+- Clean Fifteen (15 produce items with lowest pesticides)
+- Pesticide risk ratings
+- Organic vs. conventional recommendations
 
-| EWG Database | URL | Update Frequency | Data Type |
-|--------------|-----|------------------|-----------|
-| **Dirty Dozen/Clean Fifteen** | ewg.org/foodnews | Annual (spring) | Pesticide rankings |
-| **Food Scores** | ewg.org/foodscores | Ongoing | 80,000+ products rated |
-| **Tap Water Database** | ewg.org/tapwater | Every 2-3 years | 324 contaminants, 50,000 utilities |
-| **PFAS Map** | ewg.org/interactive-maps | Ongoing | 4,900+ contamination sites |
+**URLs**:
+- Main: https://www.ewg.org/foodnews/
+- Dirty Dozen: https://www.ewg.org/foodnews/dirty-dozen.php
+- Clean Fifteen: https://www.ewg.org/foodnews/clean-fifteen.php
 
-EWG's data is derived from USDA PDP testing but adds consumer-friendly risk scoring. For programmatic access, developers have created unofficial scrapers (GitHub: nikodunk/ewg-search), but these aren't officially supported.
+**Update Frequency**: Annually
+**Coverage**: 37 produce items (12 Dirty Dozen + 15 Clean Fifteen + 10 middle-tier)
+**Implementation File**: `scripts/scrapers/ewg_produce_scraper.py`
 
-### Monterey Bay Aquarium Seafood Watch
+**Data Structure**:
+```python
+{
+    "name": "Strawberries",
+    "pesticide_level": "high",
+    "risk_score": 97,
+    "risk_category": "high",
+    "ewg_rank": 1,
+    "list_type": "Dirty Dozen",
+    "advice": "Choose organic when possible to reduce pesticide exposure"
+}
+```
 
-The only major NGO with a **documented public API** (api.seafoodwatch.org). Returns sustainability ratings (Best Choice/Good Alternative/Avoid/Certified) for 350+ seafood species in JSON format. The **Super Green list** combines sustainability with low contaminant levels (mercury, PCBs).
-
-PDF pocket guides update twice annually; API data updates more frequently as assessments complete. Commercial use restrictions apply.
-
-### Specialized NGO databases
-
-| Organization | Database | Focus | Access |
-|--------------|----------|-------|--------|
-| **CSPI** | Chemical Cuisine | Food additive safety ratings | Free web |
-| **Clean Label Project** | Certified Products | 200+ contaminants tested | Free web |
-| **PAN** | PesticideInfo.org | 15,000+ pesticide chemicals | Free web |
-| **Beyond Pesticides** | Disease Database | 2,600+ studies linking pesticides to disease | Free web |
-| **Non-GMO Project** | Product Finder | 66,000+ verified products | Free web; spreadsheet by request |
-| **Oceana** | Seafood Fraud Reports | DNA testing mislabeling data | PDF reports |
-| **Global Fishing Watch** | Vessel Tracking | Satellite fishing activity | **Free API** + R/Python packages |
-
-**Global Fishing Watch** offers the most sophisticated NGO API—free with token authentication, supporting near real-time vessel tracking globally with bulk download options.
-
-**EDF Seafood Selector** has been **discontinued**—EDF now refers users to Seafood Watch.
-
-**PAN's What's On My Food** was **discontinued in 2024**—users are directed to USDA PDP or Hygeia Analytics' Dietary Risk Index.
-
----
-
-## International organizations provide harmonized global standards
-
-### WHO/FAO integrated platforms
-
-**FOSCOLLAB** (apps.who.int/foscollab) is WHO's integration hub linking JECFA evaluations, JMPR pesticide assessments, GEMS/Food contaminants, and the CIFOCOss consumption database. Free public access via web interface.
-
-**GEMS/Food** (extranet.who.int/gemsfood) contains 8+ million analytical results for chemical contaminants in foods from 70+ countries. Free registration required for detailed data access.
-
-### Codex Alimentarius databases
-
-| Codex Database | URL | Content | Updates |
-|----------------|-----|---------|---------|
-| **Pesticide Residues** | fao.org/fao-who-codexalimentarius | 6,453 MRLs for pesticide/commodity pairs | Annual after CAC sessions |
-| **Veterinary Drugs** | fao.org/fao-who-codexalimentarius | MRLs and risk recommendations | Annual |
-| **GSFA (Food Additives)** | fao.org/fao-who-codexalimentarius | Permitted additive conditions | Annual |
-| **CXS 193 Contaminants** | PDF standard | Maximum levels for contaminants | Periodic revisions |
-
-### JECFA and JMPR evaluation databases
-
-The **JECFA database** (apps.who.int/food-additives-contaminants-jecfa-database) contains 6,552+ evaluations of food additives, contaminants, and veterinary drugs with ADIs/TDIs. No bulk download available—web interface only.
-
-**JMPR** (apps.who.int/pesticide-residues-jmpr-database) provides ADIs, acute reference doses (ARfDs), and MRL recommendations for pesticides evaluated since 1991.
-
-### Regional food safety networks
-
-| Region | Organization | URL | Coverage |
-|--------|--------------|-----|----------|
-| **Americas** | PAHO | paho.org/en/topics/food-safety | 35 member states |
-| **Asia-Pacific** | AFSN/ARAC | afsn.net, arac-asean.org | 10 ASEAN states |
-| **Global** | INFOSAN | who.int | 188 of 194 member states |
-
-**INFOSAN** handles food safety emergencies across 188 countries but is restricted to officially designated national authorities—public access limited to Information Notes.
-
-### IARC carcinogenicity classifications
-
-The **IARC Monographs** (monographs.iarc.who.int) classify 1,000+ agents into carcinogenicity groups (1, 2A, 2B, 3). Food-related classifications include processed meat (Group 1), red meat (Group 2A), and specific chemicals like aflatoxins. Freely downloadable PDF monographs.
+**Integration Notes**:
+- 2024 data included
+- Ranked by pesticide load
+- Clear organic recommendations
+- Backed by independent testing
 
 ---
 
-## Commercial and open data sources enable programmatic access
+### 3. PubMed / NCBI - ⭐⭐⭐⭐⭐ (9/10)
 
-### Open Food Facts dominates open food data
+**Status**: ✅ Implemented
+**Type**: Academic / Government
+**Implementation**: API (E-utilities)
 
-**Open Food Facts** (world.openfoodfacts.org) offers **4+ million products** from 150 countries under Open Database License (ODbL):
+**Data Collected**:
+- Peer-reviewed research papers on food safety
+- Studies on mercury, microplastics, pesticides, heavy metals
+- Academic journals and publications
+- DOIs, PMIDs, abstracts
 
-- REST API v2 with no authentication required for reads
-- Bulk downloads as CSV, JSONL, JSON, RDF
-- Includes Nutri-Score, NOVA groups, Eco-Score, additives, allergens
-- Crowdsourced—data quality varies; best for packaged goods
+**URLs**:
+- Main: https://pubmed.ncbi.nlm.nih.gov/
+- API: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/
 
-**FoodRepo** (foodrepo.org) is being **retired February 28, 2026**—migrate to Open Food Facts.
+**Update Frequency**: Continuous (real-time)
+**Coverage**: 150+ papers collected
+**Implementation File**: `scripts/scrapers/pubmed_scraper.py`
 
-### Nutrition API comparison
+**Search Topics**:
+- Mercury contamination in fish
+- Microplastics in food
+- Pesticide residues in produce
+- Food safety contaminants
+- Heavy metals in seafood
+- Foodborne pathogens
+- PCBs in fish consumption
 
-| API | Foods | Pricing | Rate Limits | Best For |
-|-----|-------|---------|-------------|----------|
-| **USDA FoodData Central** | 300,000+ | Free | 1,000/hour | Authoritative baseline |
-| **Open Food Facts** | 4M+ | Free | Use bulk for heavy loads | Global packaged foods |
-| **FatSecret** | 1M+ | Free (basic) | Generous | Consumer apps |
-| **Edamam** | 900,000+ | Free tier to $999/mo | 200/min on paid | Recipe analysis |
-| **Spoonacular** | 365,000+ | Free tier to $149/mo | Varies | Recipe management |
-| **Nutritionix** | 1.2M+ | $299/mo minimum | Enterprise | Commercial apps |
-| **Chomp** | 875,000+ | $299/mo + MAU fees | Enterprise | Branded foods + allergens |
+**Data Structure**:
+```python
+{
+    "pmid": "12345678",
+    "title": "Mercury levels in Atlantic salmon...",
+    "authors": ["Smith J", "Doe A"],
+    "abstract": "This study examines...",
+    "journal": "Food Safety Journal",
+    "publication_date": "2024-05-01",
+    "doi": "10.1234/example",
+    "keywords": ["mercury", "fish", "contamination"],
+    "url": "https://pubmed.ncbi.nlm.nih.gov/12345678/"
+}
+```
 
-**Nutritionix** discontinued its free tier—minimum now $299/month. **CalorieNinjas** is transitioning to API Ninjas.
-
-### Barcode/UPC databases
-
-| Service | Products | Pricing | API |
-|---------|----------|---------|-----|
-| **GS1 Data Hub** | 360M+ global | Membership required | Yes |
-| **Barcode Lookup** | 500M+ | $99/mo minimum | Yes |
-| **UPCitemdb** | Large | Free tier (100/day) | Yes |
-| **Go-UPC** | 1B+ | Paid tiers | Yes |
-| **EAN-Search** | 1B+ | Free basic; paid API | Yes |
-
-**GS1** is the authoritative source for official GTIN/UPC data but requires paid membership.
-
-### Recall monitoring APIs
-
-| Source | Coverage | Access | Format |
-|--------|----------|--------|--------|
-| **FDA openFDA** | All FDA-regulated | Free API | JSON |
-| **USDA FSIS** | Meat/poultry/eggs | Free API (since 2023) | JSON |
-| **RASFF (EU)** | EU food/feed alerts | Web search | HTML |
-| **CFIA (Canada)** | Canadian recalls | Web + RSS | HTML |
-
-### Sustainability and carbon footprint databases
-
-**Eaternity** maintains the largest food LCA database (950+ ingredients) with CO₂ and water footprint data, but requires paid API access.
-
-**Our World in Data** (ourworldindata.org/explorers/food-footprints) offers free interactive food footprint data with downloadable datasets via GitHub.
-
-**SU-EATABLE LIFE** provides a free research database with 3,349 carbon footprint values published in Nature Scientific Data.
+**Integration Notes**:
+- Free API access
+- No authentication required
+- Rate limits: 3 requests/second
+- Last 2 years of publications collected
+- Automatic keyword extraction
 
 ---
 
-## Industry certification databases verify supplier compliance
+### 4. USDA FoodData Central - ⭐⭐⭐⭐⭐ (10/10)
 
-### GFSI-benchmarked certification directories
+**Status**: ✅ Implemented
+**Type**: Government
+**Implementation**: REST API Client
 
-| Certification | Directory | Coverage | Access |
-|---------------|-----------|----------|--------|
-| **SQF** | sqf.etq.com | Global (North America focus) | Free search |
-| **BRCGS** | brcgs.com | 35,000+ sites, 130 countries | Free search |
-| **FSSC 22000** | Via certification bodies | Global | Registration required |
-| **IFS** | ifs-certification.com | Europe focus | Registration required |
+**Data Collected**:
+- Nutritional information (macros, vitamins, minerals)
+- Serving sizes
+- Food categories
+- Foundation foods, SR Legacy, Survey foods
 
-None offer public APIs—verification requires web searches or direct certification body contact.
+**URLs**:
+- Main: https://fdc.nal.usda.gov/
+- API: https://api.nal.usda.gov/fdc/v1/
 
-### Seafood traceability standards
+**Update Frequency**: Monthly
+**API Key**: Optional (free signup at https://fdc.nal.usda.gov/api-key-signup.html)
+**Coverage**: Common foods nutrition data
+**Implementation File**: `scripts/scrapers/usda_api_client.py`
 
-The **Global Dialogue on Seafood Traceability (GDST)** (thegdst.org) provides interoperability standards rather than a database. The open-source **Traceability Driver** tool helps implement GDST-compliant data exchange.
+**Data Structure**:
+```python
+{
+    "name": "Chicken breast",
+    "fdc_id": 171477,
+    "nutrients": {
+        "Protein": {"value": 31, "unit": "g"},
+        "Total lipid (fat)": {"value": 3.6, "unit": "g"},
+        "Energy": {"value": 165, "unit": "kcal"}
+    }
+}
+```
 
-Commercial platforms implementing GDST include **Trace Register**, **BlueTrace**, and **Wholechain**.
-
----
-
-## Priority recommendations for a consumer platform
-
-### Tier 1: Essential free sources with API access
-
-1. **USDA FoodData Central API** - Authoritative nutrition baseline
-2. **Open Food Facts API** - Broadest product coverage globally
-3. **FDA openFDA APIs** - Recalls and adverse events
-4. **Seafood Watch API** - Seafood sustainability ratings
-5. **USDA PDP downloads** - Comprehensive pesticide residue data
-
-### Tier 2: Essential free sources requiring web access or downloads
-
-1. **EWG databases** - Consumer-friendly contaminant rankings
-2. **EFSA OpenFoodTox** - Toxicological reference values
-3. **Codex MRL databases** - International standards
-4. **JECFA/JMPR databases** - Safety assessments
-
-### Tier 3: Commercial APIs for enhanced coverage
-
-1. **FatSecret** (free tier) - Additional nutrition data
-2. **Edamam** (freemium) - Recipe analysis
-3. **Barcode Lookup or UPCitemdb** - Product identification
-
-### Critical data gaps to address
-
-- **State fish advisories**: No centralized database; requires aggregating 50 state sources
-- **Microplastics in food**: No comprehensive monitoring database exists
-- **Real-time contaminant testing**: Most data has 1-2 year publication lag
-- **Global recall aggregation**: No single source covers international recalls
+**Integration Notes**:
+- Works without API key (lower rate limits)
+- Comprehensive nutrition database
+- Multiple food databases available
+- High quality government data
 
 ---
 
-## Conclusion
+## 📋 PLANNED SOURCES
 
-Building comprehensive food safety coverage requires combining approximately **15-20 core sources** from this catalog: government APIs (USDA, FDA, EPA) provide authoritative contaminant and nutrition data; NGO databases (EWG, Seafood Watch) add consumer-friendly risk context; Open Food Facts supplies product-level data at scale; and international sources (Codex, JECFA, EFSA) provide global harmonized standards.
+### 5. EPA (Environmental Protection Agency) - ⭐⭐⭐⭐⭐ (10/10)
 
-The most significant technical constraint is that most NGO databases lack APIs—EWG's databases, despite their consumer value, require web scraping or manual data collection. The EU's OpenFoodTox and EFSA databases offer superior programmatic access compared to equivalent U.S. sources.
+**Status**: 📋 Planned for Milestone 2
+**Type**: Government
+**Planned Implementation**: API + Web Scraper
 
-For a consumer-facing platform, prioritize sources with documented APIs and clear licensing (USDA, FDA, Open Food Facts, Seafood Watch), then supplement with manually curated data from web-only sources (EWG, state advisories) where consumer value justifies the maintenance overhead.
+**Data to Collect**:
+- State-by-state fish advisories
+- Water quality affecting fish safety
+- Pesticide residue limits
+- Regional contamination data
+
+**URLs**:
+- Fish Advisories: https://fishadvisoryonline.epa.gov/
+- Water Quality: https://www.epa.gov/waterdata
+
+**Update Frequency**: Quarterly
+**Priority**: HIGH
+**Estimated Integration Time**: 2-3 days
+
+**Why Important**:
+- Localized fish safety data
+- State-specific recommendations
+- Water body contamination levels
+
+---
+
+### 6. NOAA FishWatch - ⭐⭐⭐⭐⭐ (10/10)
+
+**Status**: 📋 Planned for Milestone 2
+**Type**: Government
+**Planned Implementation**: Web Scraper
+
+**Data to Collect**:
+- Overfishing status
+- Sustainability ratings
+- Fishing method impacts
+- Wild vs. farmed comparisons
+
+**URLs**:
+- Main: https://www.fishwatch.gov/
+
+**Update Frequency**: Quarterly
+**Priority**: MEDIUM
+**Estimated Integration Time**: 1-2 days
+
+---
+
+### 7. Monterey Bay Aquarium - Seafood Watch - ⭐⭐⭐⭐ (9/10)
+
+**Status**: 📋 Planned for Milestone 2
+**Type**: Non-Profit
+**Planned Implementation**: API (partnership required)
+
+**Data to Collect**:
+- Seafood sustainability ratings (Best/Good/Avoid)
+- Regional recommendations
+- Aquaculture certifications
+- Fishing practice assessments
+
+**URLs**:
+- Main: https://www.seafoodwatch.org/
+- API: Contact for partnership
+
+**Update Frequency**: Quarterly
+**Priority**: HIGH
+**Estimated Integration Time**: 3-5 days (partnership negotiation)
+
+**Why Important**:
+- Most trusted seafood sustainability ratings
+- Widely used by consumers and restaurants
+- Complements FDA safety data with sustainability
+
+---
+
+### 8. Consumer Reports - ⭐⭐⭐⭐ (8/10)
+
+**Status**: 📋 Planned for Milestone 3
+**Type**: Non-Profit
+**Planned Implementation**: Web Scraper (with subscription)
+
+**Data to Collect**:
+- Heavy metals in foods (arsenic, lead, cadmium)
+- Pesticide residue testing
+- Product safety testing
+- Brand-specific contamination data
+
+**URLs**:
+- Main: https://www.consumerreports.org/food/
+
+**Update Frequency**: Per study release (irregular)
+**Priority**: MEDIUM
+**Estimated Cost**: $40/year subscription
+**Estimated Integration Time**: 2-3 days
+
+---
+
+### 9. Open Food Facts - ⭐⭐⭐ (7/10)
+
+**Status**: 📋 Planned for Milestone 2 (Barcode Scanning)
+**Type**: Crowdsourced
+**Planned Implementation**: REST API
+
+**Data to Collect**:
+- Barcode (UPC/EAN) lookups
+- Product ingredients
+- Nutrition facts
+- Photos and packaging info
+
+**URLs**:
+- Main: https://world.openfoodfacts.org/
+- API: https://world.openfoodfacts.org/data
+
+**Update Frequency**: Real-time (crowdsourced)
+**API**: Free, no key required
+**Priority**: HIGH (for barcode feature)
+**Estimated Integration Time**: 1 day
+
+**Why Important**:
+- Enables barcode scanning feature
+- Large global product database
+- Free and open source
+
+---
+
+### 10. WHO (World Health Organization) - ⭐⭐⭐⭐⭐ (10/10)
+
+**Status**: 📋 Planned for Milestone 3
+**Type**: International Government
+**Planned Implementation**: Web Scraper
+
+**Data to Collect**:
+- Codex Alimentarius (international food standards)
+- Maximum residue levels (MRLs)
+- Food safety guidelines
+- International contamination limits
+
+**URLs**:
+- Main: https://www.who.int/health-topics/food-safety
+- Codex: https://www.fao.org/fao-who-codexalimentarius/en/
+
+**Update Frequency**: Annually
+**Priority**: LOW
+**Estimated Integration Time**: 3-4 days
+
+---
+
+### 11. FDA Recalls API - ⭐⭐⭐⭐⭐ (10/10)
+
+**Status**: 📋 Planned for Milestone 2 (Real-time Alerts)
+**Type**: Government
+**Planned Implementation**: REST API
+
+**Data to Collect**:
+- Real-time food recalls
+- Product details
+- Reason for recall
+- Distribution areas
+
+**URLs**:
+- API: https://api.fda.gov/food/enforcement.json
+
+**Update Frequency**: Real-time
+**Priority**: HIGH
+**Estimated Integration Time**: 1 day
+
+**Why Important**:
+- Critical for user safety
+- Enable push notifications
+- Match against saved foods
+
+---
+
+### 12. EFSA (European Food Safety Authority) - ⭐⭐⭐⭐⭐ (10/10)
+
+**Status**: 📋 Planned for International Expansion
+**Type**: International Government
+**Planned Implementation**: Web Scraper
+
+**Data to Collect**:
+- European food safety standards
+- Pesticide approvals
+- Risk assessments
+- Scientific opinions
+
+**URLs**:
+- Main: https://www.efsa.europa.eu/
+
+**Update Frequency**: Ongoing
+**Priority**: LOW (US-focused MVP)
+**Estimated Integration Time**: 5-7 days
+
+---
+
+### 13. Health Canada - ⭐⭐⭐⭐⭐ (10/10)
+
+**Status**: 📋 Planned for International Expansion
+**Type**: Government
+**Planned Implementation**: Web Scraper
+
+**Data to Collect**:
+- Canadian food safety data
+- Recalls
+- Mercury in fish
+- Pesticide MRLs
+
+**URLs**:
+- Main: https://www.canada.ca/en/health-canada/services/food-nutrition.html
+
+**Update Frequency**: Regular
+**Priority**: LOW (US-focused MVP)
+
+---
+
+### 14. Nutritionix - ⭐⭐⭐ (6/10)
+
+**Status**: 📋 Planned for Milestone 3
+**Type**: Commercial
+**Planned Implementation**: REST API
+
+**Data to Collect**:
+- Restaurant menu nutrition
+- Branded food products
+- Detailed nutrition facts
+
+**URLs**:
+- Main: https://www.nutritionix.com/
+- API: https://developer.nutritionix.com/
+
+**Update Frequency**: Real-time
+**API**: Free tier available
+**Priority**: LOW
+
+---
+
+### 15. Edamam - ⭐⭐⭐ (6/10)
+
+**Status**: 📋 Planned for Milestone 3
+**Type**: Commercial
+**Planned Implementation**: REST API
+
+**Data to Collect**:
+- Recipe nutrition analysis
+- Ingredient parsing
+- Dietary labels
+
+**URLs**:
+- Main: https://www.edamam.com/
+- API: https://developer.edamam.com/
+
+**Update Frequency**: Real-time
+**API**: Free tier available
+**Priority**: LOW
+
+---
+
+## 📈 Integration Roadmap
+
+### Milestone 1 (✅ COMPLETE)
+- [x] FDA Fish Advisory
+- [x] EWG Produce Data
+- [x] PubMed Research
+- [x] USDA Nutrition
+
+### Milestone 2 (Next 2-3 Weeks)
+- [ ] EPA Fish Advisories
+- [ ] NOAA FishWatch
+- [ ] Seafood Watch API
+- [ ] FDA Recalls (real-time)
+- [ ] Open Food Facts (barcode)
+
+### Milestone 3 (1-2 Months)
+- [ ] Consumer Reports
+- [ ] WHO Codex
+- [ ] Additional nutrition APIs
+
+### Future Expansion
+- [ ] International sources (EFSA, Health Canada)
+- [ ] Restaurant menu data
+- [ ] More research databases
+
+---
+
+## 🔍 Data Quality Standards
+
+### Credibility Tiers
+
+**Tier 1 (9-10/10)**: Government agencies, international orgs, peer-reviewed research
+- Direct integration without additional verification
+- Highest trust score shown to users
+
+**Tier 2 (7-8/10)**: Reputable NGOs, established non-profits
+- Cross-check with Tier 1 sources when possible
+- Clearly attribute source
+
+**Tier 3 (5-6/10)**: Commercial databases, crowdsourced data
+- Use for supplementary information only
+- Verify critical claims with higher-tier sources
+- Clear disclaimer to users
+
+**Tier 4 (1-4/10)**: Unverified sources, news media
+- Generally avoided
+- Only for non-critical data (e.g., food images)
+
+### Update Requirements
+
+- **Critical Safety Data**: Update within 24 hours of source change
+- **Recalls**: Real-time (< 1 hour)
+- **Research Papers**: Weekly scans
+- **Nutritional Data**: Monthly
+- **Sustainability Ratings**: Quarterly
+
+---
+
+## 📝 Implementation Guidelines
+
+### Adding a New Data Source
+
+1. **Research**
+   - Verify credibility
+   - Check update frequency
+   - Review terms of use
+   - Test API/website
+
+2. **Create Scraper/Client**
+   - Add to `scripts/scrapers/`
+   - Follow existing patterns
+   - Include error handling
+   - Add rate limiting
+
+3. **Register Source**
+   - Add to `sources` table in database
+   - Set credibility score
+   - Document update frequency
+
+4. **Test & Validate**
+   - Run scraper
+   - Validate data quality
+   - Check for duplicates
+   - Test error scenarios
+
+5. **Document**
+   - Update this file
+   - Add to API docs
+   - Update README
+
+6. **Monitor**
+   - Set up alerts for failures
+   - Track data freshness
+   - Log API errors
+
+---
+
+## 🎯 Data Coverage Goals
+
+### By Food Category
+
+| Category | Current | Milestone 2 | Milestone 3 | Final Goal |
+|----------|---------|-------------|-------------|------------|
+| **Seafood** | 60 | 100 | 200 | 500+ |
+| **Produce** | 37 | 100 | 200 | 500+ |
+| **Meat** | 0 | 50 | 100 | 200+ |
+| **Dairy** | 0 | 30 | 75 | 150+ |
+| **Grains** | 0 | 25 | 50 | 100+ |
+| **Processed** | 0 | 100 | 500 | 2000+ |
+| **Total** | **97** | **405** | **1,125** | **3,450+** |
+
+### By Contaminant Type
+
+- [x] Mercury
+- [x] Pesticides
+- [ ] Lead
+- [ ] Arsenic
+- [ ] Cadmium
+- [ ] Microplastics
+- [ ] PCBs
+- [ ] Dioxins
+- [ ] PFAS
+- [ ] Listeria
+- [ ] Salmonella
+- [ ] E. coli
+
+---
+
+## 🔐 Legal & Ethical Considerations
+
+### Data Usage Rights
+- All sources used within their terms of service
+- Proper attribution provided
+- No commercial data sold or redistributed
+- Fair use of academic research (citations only)
+
+### Privacy
+- No user data shared with data providers
+- Aggregate usage statistics only
+- GDPR and CCPA compliant
+
+### Accuracy Disclaimer
+- Data is educational, not medical advice
+- Sources cited for verification
+- Update dates clearly shown
+- Encourage consulting healthcare professionals
+
+---
+
+**Last Updated**: 2026-01-03
+**Total Sources**: 15 (4 implemented, 11 planned)
+**Next Review**: Milestone 2 planning
