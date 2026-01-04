@@ -186,3 +186,117 @@ class ResearchPaper(ResearchPaperBase):
     id: UUID
     publication_date: Optional[datetime] = None
     created_at: datetime
+
+
+# ====================
+# User & Authentication Schemas (Issue #25)
+# ====================
+
+# User Schemas
+class UserBase(BaseModel):
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = None
+    password: Optional[str] = None
+    preferences: Optional[dict] = None
+
+class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    is_verified: bool
+    is_active: bool
+    preferences: Optional[dict] = None
+
+class UserInDB(User):
+    hashed_password: str
+
+
+# Authentication Schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+
+# Saved Food Schemas
+class SavedFoodBase(BaseModel):
+    food_id: UUID
+    notes: Optional[str] = None
+
+class SavedFoodCreate(SavedFoodBase):
+    pass
+
+class SavedFood(SavedFoodBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    saved_at: datetime
+    food: Optional[Food] = None
+
+
+# Meal Plan Schemas
+class MealPlanBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    date: Optional[datetime] = None
+    meal_type: Optional[str] = None
+
+class MealPlanCreate(MealPlanBase):
+    pass
+
+class MealPlanUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[datetime] = None
+    meal_type: Optional[str] = None
+
+
+# Meal Plan Food Schemas
+class MealPlanFoodBase(BaseModel):
+    food_id: UUID
+    serving_size: Optional[str] = None
+    servings: float = 1.0
+    notes: Optional[str] = None
+
+class MealPlanFoodCreate(MealPlanFoodBase):
+    pass
+
+class MealPlanFoodInPlan(MealPlanFoodBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    meal_plan_id: UUID
+    added_at: datetime
+    food: Optional[Food] = None
+
+
+class MealPlan(MealPlanBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    foods: List[MealPlanFoodInPlan] = []
+
+
+# LLM Query Schemas
+class NaturalLanguageQuery(BaseModel):
+    query: str
+    context: Optional[str] = None  # user, advisory, sustainability, etc.
+
+class NaturalLanguageResponse(BaseModel):
+    answer: str
+    sources: List[Food] = []
+    recalls: List[dict] = []
+    advisories: List[dict] = []
