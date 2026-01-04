@@ -2,18 +2,14 @@
 Food Safety Platform API
 Main FastAPI application entry point
 """
-import sys
-import os
-
-# Add the current directory to sys.path to ensure 'app' module is found
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.api.v1.router import api_router
+
+# Note: Python path setup for shared packages is now in app/__init__.py
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

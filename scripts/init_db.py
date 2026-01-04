@@ -9,10 +9,10 @@ import re
 from pathlib import Path
 from datetime import datetime
 
-# Add apps/api to path to import from app
-sys.path.append(str(Path(__file__).parent.parent / "apps" / "api"))
-# Add scripts to path for scrapers
-sys.path.append(str(Path(__file__).parent))
+# Add parent directories to path
+PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PROJECT_ROOT / "apps" / "api"))
+sys.path.append(str(PROJECT_ROOT / "packages"))
 
 from sqlalchemy import text, select, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -98,15 +98,15 @@ async def seed_sources():
 async def seed_fish_data():
     """Seed fish data from local JSON (preferred for stability)"""
     print("🐟 Seeding fish data (from JSON)...")
-    
+
     # Path to robust data (resolve relative to script location)
     root_dir = Path(__file__).parent.parent
     fda_file = root_dir / "data" / "fda_mercury_1990_2012.json"
     ewg_file = root_dir / "data" / "ewg_seafood.json"
-    
+
     print(f"DEBUG: Checking FDA file: {fda_file} (Exists: {fda_file.exists()})")
     print(f"DEBUG: Checking EWG file: {ewg_file} (Exists: {ewg_file.exists()})")
-    
+
     if not fda_file.exists() and not ewg_file.exists():
         print(f"⚠️  No JSON data found at {root_dir / 'data'}. Skipping fish seed.")
         return
@@ -167,7 +167,7 @@ async def seed_fish_data():
                             session.add(food)
                     except Exception as e:
                         print(f"ERROR processing item {item}: {e}")
-        
+
         print(f"DEBUG: Committing {count} records...")
         await session.commit()
         print("DEBUG: Commit successful.")
@@ -179,12 +179,12 @@ async def seed_produce_data_dynamic():
     try:
         from scrapers.ewg_produce_scraper import scrape_ewg_produce
         produce_data = await scrape_ewg_produce()
-        
+
         async with AsyncSessionLocal() as session:
             produce_cat = (await session.execute(select(FoodCategory).where(FoodCategory.slug == 'produce'))).scalar_one()
             ewg_src = (await session.execute(select(Source).where(Source.name.like('EWG%')))).scalar_one()
             pesticides = (await session.execute(select(Contaminant).where(Contaminant.name == 'Pesticides'))).scalar_one()
-            
+
             count = 0
             for item in produce_data:
                 food = Food(
@@ -193,7 +193,7 @@ async def seed_produce_data_dynamic():
                 )
                 session.add(food)
                 await session.flush()
-                
+
                 lvl = FoodContaminantLevel(
                     food_id=food.id, contaminant_id=pesticides.id, level_value=None, level_unit="relative",
                     risk_category=item["risk_category"], source_id=ewg_src.id, measurement_date=datetime.now(),
@@ -211,7 +211,7 @@ async def seed_research_papers_dynamic():
     try:
         from scrapers.pubmed_scraper import collect_food_safety_papers
         papers = await collect_food_safety_papers(max_per_topic=5) # Reduced limit for speed
-        
+
         async with AsyncSessionLocal() as session:
             count = 0
             for p in papers:
@@ -237,14 +237,14 @@ async def main():
     await seed_categories()
     await seed_contaminants()
     await seed_sources()
-    
+
     # Core Data (Reliable)
     await seed_fish_data()
-    
+
     # Feature Data (Best Effort)
     await seed_produce_data_dynamic()
     await seed_research_papers_dynamic()
-    
+
     print("\n✅ DONE.")
 
 if __name__ == "__main__":

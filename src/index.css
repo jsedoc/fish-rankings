@@ -1,9 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    @apply bg-ocean-dark text-slate-100 font-sans antialiased;
-  }
-}

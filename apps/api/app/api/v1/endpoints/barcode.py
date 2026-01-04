@@ -9,7 +9,7 @@ import logging
 
 from app.db.session import get_db
 from app.db.models import Food, FoodCategory, FoodRecall
-from app.external.openfoodfacts_scraper import OpenFoodFactsScraper
+from scrapers.openfoodfacts_scraper import OpenFoodFactsScraper
 
 logger = logging.getLogger(__name__)
 
