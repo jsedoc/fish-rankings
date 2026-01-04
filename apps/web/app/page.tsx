@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Fish, Leaf, Beef, Milk } from 'lucide-react'
+import { Search, Fish, Leaf, Beef, Milk, Scan, AlertTriangle, Shield, Waves } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -39,6 +39,12 @@ export default function HomePage() {
               </div>
             </div>
             <nav className="hidden md:flex space-x-6">
+              <Link href="/barcode" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                Barcode Scanner
+              </Link>
+              <Link href="/recalls" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                Recalls
+              </Link>
               <Link href="/about" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
                 About
               </Link>
@@ -55,7 +61,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm mb-6">
-            <span className="text-sm font-medium">✨ Now with 100+ foods and research papers</span>
+            <span className="text-sm font-medium">✨ New: 2.3M+ Products • FDA Recalls • Barcode Scanner</span>
           </div>
 
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
@@ -106,6 +112,59 @@ export default function HomePage() {
               </Link>
             )
           })}
+        </div>
+      </section>
+
+      {/* New Features - Milestone 2 */}
+      <section className="bg-gradient-to-br from-blue-50 to-cyan-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full mb-4">
+              NEW FEATURES
+            </span>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Milestone 2: Advanced Food Safety Tools</h3>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Access 2.3M+ products, real-time recalls, and comprehensive safety data
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link href="/barcode" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
+                <Scan className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Barcode Scanner</h4>
+              <p className="text-sm text-gray-600 mb-3">Scan any product to check nutrition, ingredients, and recalls</p>
+              <div className="text-blue-600 text-sm font-medium">2.3M+ products →</div>
+            </Link>
+
+            <Link href="/recalls" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">FDA Recalls</h4>
+              <p className="text-sm text-gray-600 mb-3">Stay updated on food safety recalls and product alerts</p>
+              <div className="text-red-600 text-sm font-medium">700+ recalls →</div>
+            </Link>
+
+            <Link href="/advisories" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-4">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">EPA Advisories</h4>
+              <p className="text-sm text-gray-600 mb-3">Fish consumption warnings by state and waterbody</p>
+              <div className="text-green-600 text-sm font-medium">100+ advisories →</div>
+            </Link>
+
+            <Link href="/sustainability" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
+                <Waves className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Sustainability</h4>
+              <p className="text-sm text-gray-600 mb-3">NOAA ratings for sustainable seafood choices</p>
+              <div className="text-blue-600 text-sm font-medium">14+ ratings →</div>
+            </Link>
+          </div>
         </div>
       </section>
 
