@@ -27,18 +27,18 @@ python-dotenv==1.0.1
 httpx==0.28.1
 aiohttp==3.11.11
 
-# Web Scraping
+# Web Scraping (Runtime only if needed, minimal)
 beautifulsoup4==4.12.3
 lxml==5.3.0
-scrapy==2.12.0
+# scrapy removed (too big)
 
 # Search
-elasticsearch==8.17.0
+# elasticsearch removed (unused)
 
 # Data Processing
-pandas==2.2.3
-numpy==2.2.1
+# pandas removed (too big)
+# numpy removed (too big)
 
 # Testing
-pytest==8.3.4
-pytest-asyncio==0.24.0
+# pytest removed (dev only)
+# pytest-asyncio removed (dev only)
