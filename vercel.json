@@ -24,6 +24,9 @@
             "dest": "apps/api/main.py"
         },
         {
+            "handle": "filesystem"
+        },
+        {
             "src": "/(.*)",
             "dest": "apps/web/$1"
         }
