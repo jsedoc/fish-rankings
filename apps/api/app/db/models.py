@@ -43,6 +43,8 @@ class Food(Base):
     category = relationship("FoodCategory", back_populates="foods")
     contaminant_levels = relationship("FoodContaminantLevel", back_populates="food", cascade="all, delete-orphan")
     nutrients = relationship("FoodNutrient", back_populates="food", cascade="all, delete-orphan")
+    advisories = relationship("StateAdvisory", back_populates="food")
+    # sustainability_ratings is added via backref in SustainabilityRating
 
     # Note: Fuzzy search index (pg_trgm) can be added later with:
     # CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -208,6 +210,7 @@ class StateAdvisory(Base):
 
     # Link to food if we can match it
     food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="SET NULL"), nullable=True, index=True)
+    food = relationship("Food", back_populates="advisories")
 
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())

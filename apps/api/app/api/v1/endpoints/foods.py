@@ -54,7 +54,9 @@ async def get_food(
         joinedload(models.Food.category),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
-        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source),
+        selectinload(models.Food.advisories),
+        selectinload(models.Food.sustainability_ratings)
     )
     result = await db.execute(query)
     food = result.unique().scalar_one_or_none()
@@ -77,7 +79,9 @@ async def get_food_by_slug(
         joinedload(models.Food.category),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
-        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source),
+        selectinload(models.Food.advisories),
+        selectinload(models.Food.sustainability_ratings)
     )
     result = await db.execute(query)
     food = result.unique().scalar_one_or_none()
@@ -100,7 +104,9 @@ async def get_food_by_barcode(
         joinedload(models.Food.category),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.contaminant),
         joinedload(models.Food.contaminant_levels).joinedload(models.FoodContaminantLevel.source),
-        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source)
+        joinedload(models.Food.nutrients).joinedload(models.FoodNutrient.source),
+        selectinload(models.Food.advisories),
+        selectinload(models.Food.sustainability_ratings)
     )
     result = await db.execute(query)
     food = result.unique().scalar_one_or_none()

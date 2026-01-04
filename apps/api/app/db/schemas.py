@@ -90,6 +90,40 @@ class FoodNutrient(FoodNutrientBase):
     source: Optional[Source] = None
 
 
+# State Advisory Schemas
+class StateAdvisoryBase(BaseModel):
+    state_code: str
+    state_name: str
+    waterbody_name: Optional[str] = None
+    fish_species: str
+    contaminant_type: Optional[str] = None
+    advisory_text: Optional[str] = None
+    consumption_limit: Optional[str] = None
+    advisory_level: Optional[str] = None
+
+class StateAdvisory(StateAdvisoryBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    effective_date: Optional[datetime] = None
+
+
+# Sustainability Rating Schemas
+class SustainabilityRatingBase(BaseModel):
+    rating: str
+    rating_score: Optional[int] = None
+    source: str
+    fishing_method: Optional[str] = None
+    location: Optional[str] = None
+    is_farmed: Optional[bool] = None
+    is_wild_caught: Optional[bool] = None
+
+class SustainabilityRating(SustainabilityRatingBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    certification: List[str] = []
+    habitat_impact: Optional[str] = None
+
+
 # Food Schemas
 class FoodBase(BaseModel):
     name: str
@@ -117,6 +151,8 @@ class FoodDetail(Food):
     """Extended food schema with contaminants and nutrients"""
     contaminant_levels: List[FoodContaminantLevel] = []
     nutrients: List[FoodNutrient] = []
+    advisories: List[StateAdvisory] = []
+    sustainability_ratings: List[SustainabilityRating] = []
 
 
 # Search Schemas
