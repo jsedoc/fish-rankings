@@ -17,10 +17,10 @@ export default function HomePage() {
   }
 
   const categories = [
-    { name: 'Seafood', slug: 'seafood', icon: Fish, color: 'from-blue-500 to-cyan-500', count: '60+' },
-    { name: 'Produce', slug: 'produce', icon: Leaf, color: 'from-green-500 to-emerald-500', count: '40+' },
-    { name: 'Meat & Poultry', slug: 'meat-poultry', icon: Beef, color: 'from-red-500 to-orange-500', count: 'Coming Soon' },
-    { name: 'Dairy', slug: 'dairy', icon: Milk, color: 'from-purple-500 to-pink-500', count: 'Coming Soon' },
+    { name: 'Seafood', slug: 'seafood', icon: Fish, color: 'from-blue-500 to-cyan-500', count: '60+', recalls: '150+' },
+    { name: 'Produce', slug: 'produce', icon: Leaf, color: 'from-green-500 to-emerald-500', count: '40+', recalls: '50+' },
+    { name: 'Meat & Poultry', slug: 'meat-poultry', icon: Beef, color: 'from-red-500 to-orange-500', count: '25+', recalls: '300+' },
+    { name: 'Dairy', slug: 'dairy', icon: Milk, color: 'from-purple-500 to-pink-500', count: '20+', recalls: '150+' },
   ]
 
   return (
@@ -101,14 +101,15 @@ export default function HomePage() {
             return (
               <Link
                 key={category.slug}
-                href={category.count === 'Coming Soon' ? '#' : `/category/${category.slug}`}
-                className={`card p-6 hover:scale-105 transition-transform ${category.count === 'Coming Soon' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                href={`/category/${category.slug}`}
+                className="card p-6 hover:scale-105 transition-transform"
               >
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center mb-4`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-1">{category.name}</h4>
-                <p className="text-sm text-gray-600">{category.count} foods</p>
+                <p className="text-sm text-gray-600 mb-1">{category.count} foods</p>
+                <p className="text-xs text-red-600 font-medium">{category.recalls} recalls</p>
               </Link>
             )
           })}
