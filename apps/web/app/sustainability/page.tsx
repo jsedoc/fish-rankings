@@ -26,7 +26,6 @@ interface SustainabilityRating {
 
 export default function SustainabilityPage() {
   const [ratings, setRatings] = useState<SustainabilityRating[]>([])
-  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'Best Choice' | 'Good Alternative' | 'Avoid'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -35,7 +34,6 @@ export default function SustainabilityPage() {
   }, [filter])
 
   const fetchRatings = async () => {
-    setLoading(true)
     try {
       // Note: This endpoint would need to be implemented on the backend
       const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/sustainability`
@@ -58,8 +56,6 @@ export default function SustainabilityPage() {
     } catch (err) {
       console.error('Failed to fetch sustainability ratings:', err)
       setRatings([])
-    } finally {
-      setLoading(false)
     }
   }
 
