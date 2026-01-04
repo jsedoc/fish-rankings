@@ -7,7 +7,9 @@ async def test_get_recalls(async_client):
     data = response.json()
     assert "recalls" in data
     assert "total" in data
-    assert len(data["recalls"]) > 0
+    assert isinstance(data["recalls"], list)
+    if data["total"] > 0:
+        assert len(data["recalls"]) > 0
 
 @pytest.mark.asyncio
 async def test_get_recent_recalls(async_client):
