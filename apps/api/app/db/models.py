@@ -219,7 +219,7 @@ class SustainabilityRating(Base):
     __tablename__ = "sustainability_ratings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="CASCADE"), nullable=False, index=True)
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="CASCADE"), nullable=True, index=True)
 
     # Rating info
     rating = Column(String(50), nullable=False)  # Best Choice, Good Alternative, Avoid
