@@ -63,14 +63,6 @@ export default function SustainabilityPage() {
     }
   }
 
-  const getRatingColor = (rating: string) => {
-    const colors: Record<string, string> = {
-      'Best Choice': 'bg-green-100 text-green-800 border-green-300',
-      'Good Alternative': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      'Avoid': 'bg-red-100 text-red-800 border-red-300',
-    }
-    return colors[rating] || 'bg-gray-100 text-gray-800 border-gray-300'
-  }
 
   const getRatingIcon = (rating: string) => {
     if (rating === 'Best Choice') return <CheckCircle className="w-5 h-5 text-green-600" />
