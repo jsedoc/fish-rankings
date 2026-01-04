@@ -38,12 +38,17 @@ export default function SustainabilityPage() {
     setLoading(true)
     try {
       // Note: This endpoint would need to be implemented on the backend
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/sustainability${
-          filter !== 'all' ? `?rating=${filter}` : ''
-        }`
-      )
+      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/sustainability`
+      const params = new URLSearchParams()
 
+      if (filter !== 'all') {
+        params.set('rating', filter)
+      }
+
+      const queryString = params.toString()
+      const url = queryString ? `${baseUrl}?${queryString}` : baseUrl
+
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setRatings(data.ratings || [])
