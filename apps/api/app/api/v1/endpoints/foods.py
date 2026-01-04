@@ -13,7 +13,7 @@ from app.db import models, schemas
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.Food])
+@router.get("", response_model=List[schemas.Food])
 async def list_foods(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -23,17 +23,23 @@ async def list_foods(
     """
     List all foods with optional filtering
     """
-    query = select(models.Food).options(joinedload(models.Food.category))
+    # Use selectinload for relationships to avoid join conflicts and Greenlet errors
+    query = select(models.Food).options(selectinload(models.Food.category))
 
     if category:
-        # Join with category and filter
-        query = query.join(models.FoodCategory).where(models.FoodCategory.slug == category)
+        # Explicit join for filtering
+        query = query.join(models.Food.category).where(models.FoodCategory.slug == category)
 
     query = query.offset(skip).limit(limit)
-    result = await db.execute(query)
-    foods = result.unique().scalars().all()
-
-    return foods
+    
+    try:
+        result = await db.execute(query)
+        # With selectinload, scalars().all() is usually sufficient, but unique() doesn't hurt
+        foods = result.unique().scalars().all()
+        return foods
+    except Exception as e:
+        print(f"Error listing foods: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{food_id}", response_model=schemas.FoodDetail)
