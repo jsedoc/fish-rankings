@@ -13,7 +13,7 @@ from app.db import models, schemas
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.Food])
+@router.get("", response_model=List[schemas.Food])
 async def list_foods(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
