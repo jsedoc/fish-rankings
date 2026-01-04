@@ -1,0 +1,34 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "apps/api/main.py",
+            "use": "@vercel/python"
+        },
+        {
+            "src": "apps/web/package.json",
+            "use": "@vercel/next"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/v1/(.*)",
+            "dest": "apps/api/main.py"
+        },
+        {
+            "src": "/api/docs",
+            "dest": "apps/api/main.py"
+        },
+        {
+            "src": "/api/openapi.json",
+            "dest": "apps/api/main.py"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "apps/web/$1"
+        }
+    ]
+}

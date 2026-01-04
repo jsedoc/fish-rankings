@@ -11,7 +11,7 @@ from app.db import models, schemas
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.FoodCategory])
+@router.get("", response_model=List[schemas.FoodCategory])
 async def list_categories(
     db: AsyncSession = Depends(get_db)
 ):

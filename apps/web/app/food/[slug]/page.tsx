@@ -1,7 +1,9 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, notFound } from 'next/navigation'
 import { ArrowLeft, ExternalLink, AlertTriangle, CheckCircle, Info } from 'lucide-react'
 import Link from 'next/link'
 
@@ -155,22 +157,22 @@ export default function FoodDetailPage() {
         </div>
 
         {/* Overall Safety Score */}
-        {food.contaminant_levels.length > 0 && (
+        {food.contaminant_levels?.length > 0 && (
           <div className="card p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4">Safety Overview</h2>
             <div className="flex items-center space-x-3">
-              {getRiskIcon(food.contaminant_levels[0].risk_category)}
+              {getRiskIcon(food.contaminant_levels[0].risk_category || 'unknown')}
               <span
                 className={`px-4 py-2 rounded-full text-lg font-medium border ${getRiskColor(
-                  food.contaminant_levels[0].risk_category
+                  food.contaminant_levels[0].risk_category || 'unknown'
                 )}`}
               >
-                {food.contaminant_levels[0].risk_category.charAt(0).toUpperCase() +
-                  food.contaminant_levels[0].risk_category.slice(1)}{' '}
+                {(food.contaminant_levels[0].risk_category || 'Unknown').charAt(0).toUpperCase() +
+                  (food.contaminant_levels[0].risk_category || 'Unknown').slice(1)}{' '}
                 Risk
               </span>
               <span className="text-gray-600">
-                Score: {food.contaminant_levels[0].risk_score}/100
+                Score: {food.contaminant_levels[0].risk_score ?? 'N/A'}/100
               </span>
             </div>
           </div>

@@ -1,0 +1,410 @@
+[
+  {
+    "name": "Scallop",
+    "mercury_mean_ppm": 0.003,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Clam",
+    "mercury_mean_ppm": 0.009,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Shrimp",
+    "mercury_mean_ppm": 0.009,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Oyster",
+    "mercury_mean_ppm": 0.012,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Sardine",
+    "mercury_mean_ppm": 0.013,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tilapia",
+    "mercury_mean_ppm": 0.013,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Salmon (Canned)",
+    "mercury_mean_ppm": 0.014,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Anchovies",
+    "mercury_mean_ppm": 0.016,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Salmon (Fresh/Frozen)",
+    "mercury_mean_ppm": 0.022,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Catfish",
+    "mercury_mean_ppm": 0.024,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Squid",
+    "mercury_mean_ppm": 0.024,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Pollock",
+    "mercury_mean_ppm": 0.031,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Crawfish",
+    "mercury_mean_ppm": 0.033,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Shad",
+    "mercury_mean_ppm": 0.038,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mackerel Atlantic (N.Atlantic)",
+    "mercury_mean_ppm": 0.05,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mullet",
+    "mercury_mean_ppm": 0.05,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Whiting",
+    "mercury_mean_ppm": 0.051,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Haddock (Atlantic)",
+    "mercury_mean_ppm": 0.055,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Flatfish [2]",
+    "mercury_mean_ppm": 0.056,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Butterfish",
+    "mercury_mean_ppm": 0.058,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Crab [1]",
+    "mercury_mean_ppm": 0.065,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Croaker Atlantic (Atlantic)",
+    "mercury_mean_ppm": 0.069,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Trout (Freshwater)",
+    "mercury_mean_ppm": 0.071,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Herring",
+    "mercury_mean_ppm": 0.078,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Hake",
+    "mercury_mean_ppm": 0.079,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Jacksmelt",
+    "mercury_mean_ppm": 0.081,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mackerel Chub (Pacific)",
+    "mercury_mean_ppm": 0.088,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Whitefish",
+    "mercury_mean_ppm": 0.089,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Sheepshead",
+    "mercury_mean_ppm": 0.09,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Lobster (Spiny)",
+    "mercury_mean_ppm": 0.093,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Pickerel",
+    "mercury_mean_ppm": 0.095,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Lobster (Northern / American)",
+    "mercury_mean_ppm": 0.107,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Carp",
+    "mercury_mean_ppm": 0.11,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Cod",
+    "mercury_mean_ppm": 0.111,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Perch Ocean",
+    "mercury_mean_ppm": 0.121,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Canned, Light)",
+    "mercury_mean_ppm": 0.126,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Buffalofish",
+    "mercury_mean_ppm": 0.137,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Skate",
+    "mercury_mean_ppm": 0.137,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tilefish (Atlantic)",
+    "mercury_mean_ppm": 0.144,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, Skipjack)",
+    "mercury_mean_ppm": 0.144,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Perch (Freshwater)",
+    "mercury_mean_ppm": 0.15,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Monkfish",
+    "mercury_mean_ppm": 0.161,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Lobster (Species Unknown)",
+    "mercury_mean_ppm": 0.166,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Snapper",
+    "mercury_mean_ppm": 0.166,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Bass (Saltwater, Black, Striped, Rockfish) [3]",
+    "mercury_mean_ppm": 0.167,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mahi Mahi",
+    "mercury_mean_ppm": 0.178,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mackerel Spanish (S. Atlantic)",
+    "mercury_mean_ppm": 0.182,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Scorpionfish",
+    "mercury_mean_ppm": 0.233,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Weakfish (Sea Trout)",
+    "mercury_mean_ppm": 0.235,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Halibut",
+    "mercury_mean_ppm": 0.241,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Croaker White (Pacific)",
+    "mercury_mean_ppm": 0.287,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Canned, Albacore)",
+    "mercury_mean_ppm": 0.35,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Bass Chilean",
+    "mercury_mean_ppm": 0.354,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, Yellowfin)",
+    "mercury_mean_ppm": 0.354,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, Albacore)",
+    "mercury_mean_ppm": 0.358,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Sablefish",
+    "mercury_mean_ppm": 0.361,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Bluefish",
+    "mercury_mean_ppm": 0.368,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, All)",
+    "mercury_mean_ppm": 0.386,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, Species Unknown)",
+    "mercury_mean_ppm": 0.41,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Grouper (All Species)",
+    "mercury_mean_ppm": 0.448,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mackerel Spanish (Gulf Of Mexico)",
+    "mercury_mean_ppm": 0.454,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Marlin",
+    "mercury_mean_ppm": 0.485,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Orange Roughy",
+    "mercury_mean_ppm": 0.571,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tuna (Fresh/Frozen, Bigeye)",
+    "mercury_mean_ppm": 0.689,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Mackerel King",
+    "mercury_mean_ppm": 0.73,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Shark",
+    "mercury_mean_ppm": 0.979,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Swordfish",
+    "mercury_mean_ppm": 0.995,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  },
+  {
+    "name": "Tilefish (Gulf Of Mexico)",
+    "mercury_mean_ppm": 1.123,
+    "source": "FDA",
+    "year_range": "1990-2012"
+  }
+]
