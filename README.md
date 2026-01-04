@@ -2,6 +2,24 @@
 
 A comprehensive, data-driven web platform that empowers consumers to make informed, healthier food choices by aggregating and presenting food safety information from authoritative sources (FDA, EPA, academic research, NGOs).
 
+## 🚨 Production Deployment Status
+
+**Current Issue**: Category pages return 404 on https://fish-rankings.vercel.app/category/seafood
+
+**Cause**: Backend API not deployed yet (frontend is deployed to Vercel)
+
+**Fix**: 👉 **[PRODUCTION_404_FIX.md](./PRODUCTION_404_FIX.md)** ← Follow this guide to deploy the backend and fix the 404 error
+
+**Quick Summary**:
+1. Deploy backend to Railway (`railway init && railway up`)
+2. Seed production database (`./seed-production.sh`)
+3. Set `NEXT_PUBLIC_API_URL` in Vercel environment variables
+4. Redeploy frontend
+
+**See also**: [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md) for current deployment status
+
+---
+
 ## 🎯 Features (Milestone 1)
 
 - ✅ **100+ Foods**: Comprehensive database of seafood and produce with safety data
