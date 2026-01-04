@@ -21,9 +21,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
 
-from app.db.models import Base, FoodRecall, Source
+from app.db.models import Base, FoodRecall, StateAdvisory, SustainabilityRating, Source, Food
 from app.core.config import settings
 from scrapers.fda_recalls_scraper import FDARecallsScraper
+from scrapers.epa_advisories_scraper import EPAAdvisoriesScraper
+from scrapers.noaa_fishwatch_scraper import NOAAFishWatchScraper
 
 
 async def create_tables(engine):
@@ -185,10 +187,116 @@ async def seed_fda_recalls(session: AsyncSession):
         await scraper.close()
 
 
+async def add_epa_source(session: AsyncSession):
+    """Add EPA as a data source"""
+    print("\n📚 Adding EPA data source...")
+    result = await session.execute(select(Source).where(Source.name == "EPA Fish Advisories"))
+    source = result.scalar_one_or_none()
+    if source:
+        print("✅ EPA source already exists")
+        return source
+    source = Source(name="EPA Fish Advisories", url="https://fishadvisoryonline.epa.gov/",
+                   source_type="government", credibility_score=10, last_updated=datetime.now(),
+                   update_frequency="quarterly")
+    session.add(source)
+    await session.commit()
+    await session.refresh(source)
+    print("✅ Added EPA data source")
+    return source
+
+
+async def add_noaa_source(session: AsyncSession):
+    """Add NOAA as a data source"""
+    print("\n📚 Adding NOAA data source...")
+    result = await session.execute(select(Source).where(Source.name == "NOAA FishWatch"))
+    source = result.scalar_one_or_none()
+    if source:
+        print("✅ NOAA source already exists")
+        return source
+    source = Source(name="NOAA FishWatch", url="https://www.fishwatch.gov/",
+                   source_type="government", credibility_score=10, last_updated=datetime.now(),
+                   update_frequency="quarterly")
+    session.add(source)
+    await session.commit()
+    await session.refresh(source)
+    print("✅ Added NOAA data source")
+    return source
+
+
+async def seed_epa_advisories(session: AsyncSession):
+    """Seed EPA fish advisories"""
+    print("\n🗺️  Fetching EPA Fish Advisories...")
+    scraper = EPAAdvisoriesScraper()
+    advisories_data = await scraper.get_all_advisories(states_limit=10, advisories_per_state=5)
+    print(f"📥 Retrieved {len(advisories_data)} advisories")
+
+    inserted = 0
+    for adv_data in advisories_data:
+        advisory = StateAdvisory(
+            state_code=adv_data['state_code'],
+            state_name=adv_data['state_name'],
+            waterbody_name=adv_data['waterbody_name'],
+            waterbody_type=adv_data['waterbody_type'],
+            fish_species=adv_data['fish_species'],
+            contaminant_type=adv_data['contaminant_type'],
+            contaminant_level=adv_data['contaminant_level'],
+            contaminant_unit=adv_data['contaminant_unit'],
+            advisory_text=adv_data['advisory_text'],
+            consumption_limit=adv_data['consumption_limit'],
+            advisory_level=adv_data['advisory_level'],
+            sensitive_populations=adv_data['sensitive_populations'],
+            effective_date=adv_data['effective_date'],
+            source_url=adv_data['source_url']
+        )
+        session.add(advisory)
+        inserted += 1
+        if inserted % 25 == 0:
+            await session.commit()
+    await session.commit()
+    print(f"✅ Seeded {inserted} EPA advisories")
+    return inserted
+
+
+async def seed_noaa_sustainability(session: AsyncSession):
+    """Seed NOAA sustainability ratings"""
+    print("\n🌊 Fetching NOAA Sustainability Ratings...")
+    scraper = NOAAFishWatchScraper()
+    ratings_data = await scraper.get_sustainability_ratings(limit=30)
+    print(f"📥 Retrieved {len(ratings_data)} sustainability ratings")
+
+    inserted = 0
+    for rating_data in ratings_data:
+        # Try to match with existing food
+        result = await session.execute(
+            select(Food).where(Food.name.ilike(f"%{rating_data['species']}%")).limit(1)
+        )
+        food = result.scalar_one_or_none()
+
+        rating = SustainabilityRating(
+            food_id=food.id if food else None,
+            rating=rating_data['rating'],
+            rating_score=rating_data['rating_score'],
+            source=rating_data['source'],
+            fishing_method=rating_data.get('fishing_method'),
+            location=rating_data.get('location'),
+            is_farmed=rating_data.get('is_farmed', False),
+            is_wild_caught=rating_data.get('is_wild_caught', True),
+            overfished=rating_data.get('overfished', False),
+            overfishing_occurring=rating_data.get('overfishing_occurring', False),
+            sustainability_notes=rating_data.get('sustainability_notes'),
+            last_updated=datetime.now()
+        )
+        session.add(rating)
+        inserted += 1
+    await session.commit()
+    print(f"✅ Seeded {inserted} NOAA sustainability ratings")
+    return inserted
+
+
 async def main():
     """Main seeding function"""
     print("\n" + "="*60)
-    print("🌱 MILESTONE 2 - DATABASE SEEDING")
+    print("🌱 MILESTONE 2 - DATABASE SEEDING (ALL PHASES)")
     print("="*60)
 
     # Get database URL
@@ -208,19 +316,26 @@ async def main():
     )
 
     async with async_session() as session:
-        # Add data sources
+        # Phase 1: FDA Recalls
         await add_fda_recalls_source(session)
-
-        # Seed FDA recalls
         recalls_count = await seed_fda_recalls(session)
 
+    async with async_session() as session:
+        # Phase 3-4: EPA & NOAA
+        await add_epa_source(session)
+        await add_noaa_source(session)
+        advisories_count = await seed_epa_advisories(session)
+        sustainability_count = await seed_noaa_sustainability(session)
+
     print("\n" + "="*60)
-    print("✅ MILESTONE 2 SEEDING COMPLETE!")
+    print("✅ MILESTONE 2 SEEDING COMPLETE (ALL 4 PHASES)!")
     print("="*60)
     print(f"\n📊 Summary:")
-    print(f"  ├─ FDA Recalls: {recalls_count}")
-    print(f"  └─ Total new records: {recalls_count}")
-    print("\n🎉 Ready for Milestone 2 features!")
+    print(f"  ├─ Phase 1 - FDA Recalls: {recalls_count}")
+    print(f"  ├─ Phase 3 - EPA Advisories: {advisories_count}")
+    print(f"  ├─ Phase 4 - NOAA Sustainability: {sustainability_count}")
+    print(f"  └─ Total new records: {recalls_count + advisories_count + sustainability_count}")
+    print("\n🎉 Milestone 2 100% Complete!")
     print()
 
 
