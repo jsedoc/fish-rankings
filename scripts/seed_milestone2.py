@@ -14,8 +14,10 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "apps" / "api"))
+# Add parent directories to path
+PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "apps" / "api"))
+sys.path.insert(0, str(PROJECT_ROOT / "packages"))
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
