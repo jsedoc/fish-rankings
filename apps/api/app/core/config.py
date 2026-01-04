@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # External APIs
     USDA_API_KEY: str | None = None
     FDA_API_KEY: str | None = None
+    ANTHROPIC_API_KEY: str | None = None
 
     # Elasticsearch
     ELASTICSEARCH_URL: str = "http://localhost:9200"

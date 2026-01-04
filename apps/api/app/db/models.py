@@ -132,6 +132,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     preferences = Column(JSONB, default=dict)  # dietary restrictions, concerns, etc.
 
+    # Relationships
+    saved_foods = relationship("SavedFood", back_populates="user", cascade="all, delete-orphan")
+    meal_plans = relationship("MealPlan", back_populates="user", cascade="all, delete-orphan")
+
 
 class ResearchPaper(Base):
     __tablename__ = "research_papers"
@@ -256,3 +260,62 @@ class SustainabilityRating(Base):
 
     # Relationships
     food = relationship("Food", backref="sustainability_ratings")
+
+
+# ====================
+# User Features Models (Issue #25)
+# ====================
+
+class SavedFood(Base):
+    """User saved foods for quick access"""
+    __tablename__ = "saved_foods"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="CASCADE"), nullable=False, index=True)
+    notes = Column(Text)
+    saved_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="saved_foods")
+    food = relationship("Food")
+
+    # Composite index for unique user-food combinations
+    __table_args__ = (
+        Index('idx_user_food_unique', 'user_id', 'food_id', unique=True),
+    )
+
+
+class MealPlan(Base):
+    """User meal plans"""
+    __tablename__ = "meal_plans"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    date = Column(DateTime(timezone=True))  # Planned date for the meal
+    meal_type = Column(String(50))  # breakfast, lunch, dinner, snack
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="meal_plans")
+    foods = relationship("MealPlanFood", back_populates="meal_plan", cascade="all, delete-orphan")
+
+
+class MealPlanFood(Base):
+    """Foods in a meal plan with serving information"""
+    __tablename__ = "meal_plan_foods"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    meal_plan_id = Column(UUID(as_uuid=True), ForeignKey("meal_plans.id", ondelete="CASCADE"), nullable=False, index=True)
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="CASCADE"), nullable=False, index=True)
+    serving_size = Column(String(100))  # e.g., "100g", "1 cup"
+    servings = Column(Float, default=1.0)  # Number of servings
+    notes = Column(Text)
+    added_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    meal_plan = relationship("MealPlan", back_populates="foods")
+    food = relationship("Food")
