@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, notFound } from 'next/navigation'
 import { ArrowLeft, ExternalLink, AlertTriangle, CheckCircle, Info } from 'lucide-react'
 import Link from 'next/link'
 
