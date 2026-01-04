@@ -150,3 +150,106 @@ class ResearchPaper(Base):
 
     # Note: GIN index for keywords can be added later if needed
     # CREATE INDEX idx_paper_keywords ON research_papers USING gin (keywords);
+
+
+# ====================
+# Milestone 2 Models
+# ====================
+
+class FoodRecall(Base):
+    """FDA Food Recall data"""
+    __tablename__ = "food_recalls"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    recall_number = Column(String(50), unique=True, nullable=False, index=True)
+    product_description = Column(Text, nullable=False)
+    reason_for_recall = Column(Text)
+    recall_date = Column(DateTime(timezone=True))
+    report_date = Column(DateTime(timezone=True))
+    company_name = Column(String(255))
+    distribution_pattern = Column(Text)
+    product_quantity = Column(String(100))
+    status = Column(String(50))  # Ongoing, Completed, Terminated
+    classification = Column(String(20), index=True)  # Class I, II, or III
+    code_info = Column(Text)
+    voluntary_mandated = Column(String(50))
+    city = Column(String(100))
+    state = Column(String(2))
+    country = Column(String(100))
+    event_id = Column(String(50), index=True)
+
+    # Link to food if we can match it
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class StateAdvisory(Base):
+    """EPA State Fish Advisory data"""
+    __tablename__ = "state_advisories"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    state_code = Column(String(2), nullable=False, index=True)
+    state_name = Column(String(100), nullable=False)
+    waterbody_name = Column(String(255))
+    waterbody_type = Column(String(50))  # lake, river, ocean, etc.
+    fish_species = Column(String(255), nullable=False, index=True)
+    contaminant_type = Column(String(100))  # mercury, PCBs, etc.
+    contaminant_level = Column(Float)
+    contaminant_unit = Column(String(20))
+    advisory_text = Column(Text)
+    consumption_limit = Column(String(255))  # e.g., "1 meal per week"
+    advisory_level = Column(String(50))  # Do Not Eat, Limited Consumption, etc.
+    sensitive_populations = Column(ARRAY(String))  # pregnant women, children, etc.
+    effective_date = Column(DateTime(timezone=True))
+    source_url = Column(String(500))
+
+    # Link to food if we can match it
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class SustainabilityRating(Base):
+    """NOAA FishWatch / Seafood Watch sustainability ratings"""
+    __tablename__ = "sustainability_ratings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Rating info
+    rating = Column(String(50), nullable=False)  # Best Choice, Good Alternative, Avoid
+    rating_score = Column(Integer)  # 1-10 numeric score
+    source = Column(String(100), nullable=False)  # NOAA, Seafood Watch, etc.
+
+    # Details
+    fishing_method = Column(String(255))
+    location = Column(String(255))
+    is_farmed = Column(Boolean)
+    is_wild_caught = Column(Boolean)
+    overfished = Column(Boolean)
+    overfishing_occurring = Column(Boolean)
+
+    # Additional info
+    habitat_impact = Column(String(50))  # low, moderate, high
+    bycatch_impact = Column(String(50))  # low, moderate, high
+    management_rating = Column(String(50))  # effective, moderately effective, etc.
+
+    # Text details
+    sustainability_notes = Column(Text)
+    certification = Column(ARRAY(String))  # MSC, ASC, etc.
+
+    # Dates
+    last_updated = Column(DateTime(timezone=True))
+    valid_until = Column(DateTime(timezone=True))
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    food = relationship("Food", backref="sustainability_ratings")
