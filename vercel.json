@@ -24,14 +24,6 @@
             "dest": "apps/api/main.py"
         },
         {
-            "src": "/category/(.*)",
-            "dest": "apps/web/category/[slug]?slug=$1"
-        },
-        {
-            "src": "/food/(.*)",
-            "dest": "apps/web/food/[slug]?slug=$1"
-        },
-        {
             "handle": "filesystem"
         },
         {
