@@ -42,14 +42,30 @@ export default function BarcodePage() {
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!barcode.trim()) return
+    const cleanedBarcode = barcode.trim()
+
+    if (!cleanedBarcode) {
+      setError('Please enter a barcode.')
+      setProductData(null)
+      return
+    }
+
+    const isNumeric = /^\d+$/.test(cleanedBarcode)
+    const validLengths = [8, 12, 13, 14]
+    const hasValidLength = validLengths.includes(cleanedBarcode.length)
+
+    if (!isNumeric || !hasValidLength) {
+      setError('Please enter a valid barcode (8, 12, 13, or 14 digits).')
+      setProductData(null)
+      return
+    }
 
     setLoading(true)
     setError('')
     setProductData(null)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/barcode/lookup/${barcode}`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/barcode/lookup/${cleanedBarcode}`)
 
       if (!response.ok) {
         throw new Error('Failed to lookup barcode')
