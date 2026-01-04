@@ -23,7 +23,7 @@ async def test_get_recent_recalls(async_client):
 @pytest.mark.asyncio
 async def test_search_barcode_mock(async_client):
     # This endpoint mocks external calls or queries logical DB
-    # We just checking if the route exists and returns 200 or 404 cleanly
+    # We are just checking if the route exists and returns 200 or 404 cleanly
     response = await async_client.get("/api/v1/barcode/search?q=tuna")
     assert response.status_code == 200
     # data format might be list or object depending on implementation
