@@ -68,9 +68,9 @@ export default function RecallsPage() {
         // Use search endpoint when searching
         url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/recalls?search=${encodeURIComponent(debouncedQuery)}&limit=50`
       } else if (filter === 'all') {
-        url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/recalls?limit=50`
+        url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/recalls?limit=50&days=90`
       } else {
-        url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/recalls?classification=${filter}&limit=50`
+        url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/recalls?classification=${filter}&limit=50&days=90`
       }
 
       const response = await fetch(url)
