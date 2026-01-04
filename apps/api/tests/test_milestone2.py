@@ -26,4 +26,14 @@ async def test_search_barcode_mock(async_client):
     # We are just checking if the route exists and returns 200 or 404 cleanly
     response = await async_client.get("/api/v1/barcode/search?q=tuna")
     assert response.status_code == 200
-    # data format might be list or object depending on implementation
+    data = response.json()
+    # Verify the response structure matches the barcode.py implementation
+    assert "query" in data
+    assert "page" in data
+    assert "page_size" in data
+    assert "results" in data
+    assert "count" in data
+    assert isinstance(data["results"], list)
+    assert data["query"] == "tuna"
+    assert data["page"] == 1
+    assert data["page_size"] == 10
