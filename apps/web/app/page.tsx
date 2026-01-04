@@ -147,23 +147,23 @@ export default function HomePage() {
               <div className="text-red-600 text-sm font-medium">700+ recalls →</div>
             </Link>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 opacity-75">
+            <Link href="/advisories" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">EPA Advisories</h4>
               <p className="text-sm text-gray-600 mb-3">Fish consumption warnings by state and waterbody</p>
-              <div className="text-gray-400 text-sm font-medium">Coming Soon</div>
-            </div>
+              <div className="text-green-600 text-sm font-medium">100+ advisories →</div>
+            </Link>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 opacity-75">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
+            <Link href="/sustainability" className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
                 <Waves className="w-6 h-6 text-white" />
               </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Sustainability</h4>
               <p className="text-sm text-gray-600 mb-3">NOAA ratings for sustainable seafood choices</p>
-              <div className="text-gray-400 text-sm font-medium">Coming Soon</div>
-            </div>
+              <div className="text-blue-600 text-sm font-medium">14+ ratings →</div>
+            </Link>
           </div>
         </div>
       </section>
